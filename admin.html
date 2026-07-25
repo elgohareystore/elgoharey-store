@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - Elgoharey Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #2563eb; --danger: #ef4444; --bg: #f8fafc; --text: #1e293b; }
+        body { font-family: 'Tahoma', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; direction: rtl; }
+        header { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .logo { font-size: 20px; font-weight: bold; color: var(--primary); }
+        .store-link { color: #64748b; text-decoration: none; font-size: 14px; }
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 10px; padding: 25px; margin-bottom: 25px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .card h2 { margin-top: 0; font-size: 18px; color: var(--primary); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #475569; }
+        .form-group input, .form-group select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; }
+        .btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-danger { background: var(--danger); }
+        .tags-box { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+        .tag { background: #f1f5f9; padding: 5px 12px; border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+        .tag button { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+        th, td { padding: 10px; text-align: right; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f1f5f9; color: #475569; }
+        .table-img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; }
+        .status { margin-top: 10px; font-weight: bold; font-size: 14px; padding: 8px; border-radius: 6px; text-align: center; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 8px; }
+        .tab { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo"><i class="fas fa-cog"></i> لوحة التحكم</div>
+        <a href="index.html" class="store-link"><i class="fas fa-store"></i> عرض المتجر</a>
+    </header>
+
+    <div class="container">
+        <!-- إعدادات GitHub Token -->
+        <div class="card">
+            <h2><i class="fas fa-key"></i> إعدادات الربط</h2>
+            <div class="form-group" style="max-width: 400px;">
+                <label>GitHub Personal Access Token:</label>
+                <input type="password" id="githubToken" placeholder="ألصق الرمز هنا...">
+            </div>
+            <p style="font-size: 12px; color: #64748b; margin-top: 5px;">* يتم الحفظ تلقائياً في المتصفح لتسهيل التحديثات المباشرة.</p>
+        </div>
+
+        <!-- إدارة التصنيفات -->
+        <div class="card">
+            <h2><i class="fas fa-tags"></i> التصنيفات</h2>
+            <div class="tags-box" id="categoriesBox"></div>
+            <div style="display: flex; gap: 10px; max-width: 350px;">
+                <input type="text" id="newCatInput" placeholder="تصنيف جديد..." style="flex:1;">
+                <button class="btn" onclick="addCategory()">إضافة</button>
+            </div>
+        </div>
+
+        <!-- إضافة منتج -->
+        <div class="card">
+            <h2><i class="fas fa-cart-plus"></i> إضافة منتج جديد</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>اسم المنتج:</label>
+                    <input type="text" id="prodName" placeholder="مثال: شاحن سريع">
+                </div>
+                <div class="form-group">
+                    <label>السعر:</label>
+                    <input type="number" id="prodPrice" placeholder="مثال: 150">
+                </div>
+                <div class="form-group">
+                    <label>التصنيف:</label>
+                    <select id="prodCategory"></select>
+                </div>
+                <div class="form-group" style="grid-column: 1/-1;">
+                    <label>صورة المنتج:</label>
+                    <div class="tabs">
+                        <button type="button" class="tab active" id="tabLink" onclick="switchImgTab('link')">رابط صورة</button>
+                        <button type="button" class="tab" id="tabFile" onclick="switchImgTab('file')">رفع من الجهاز</button>
+                    </div>
+                    <div id="linkContainer">
+                        <input type="text" id="prodImageLink" placeholder="ضع رابط الصورة المباشر هنا">
+                    </div>
+                    <div id="fileContainer" style="display: none;">
+                        <input type="file" id="prodImageFile" accept="image/*" style="padding: 5px; background: #fff;">
+                    </div>
+                </div>
+            </div>
+            <button class="btn" onclick="addProduct()"><i class="fas fa-save"></i> حفظ وإضافة المنتج للمتجر</button>
+            <div id="statusMsg" class="status"></div>
+        </div>
+
+        <!-- قائمة المنتجات -->
+        <div class="card">
+            <h2><i class="fas fa-box"></i> المنتجات الحالية</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>الصورة</th>
+                        <th>الاسم</th>
+                        <th>التصنيف</th>
+                        <th>السعر</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody id="productsTableBody">
+                    <tr><td colspan="5" style="text-align:center; color:#64748b;">جاري التحميل...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const REPO_OWNER = "elgohareystore";
+        const REPO_NAME = "elgoharey-store";
+        const FILE_PATH = "data.json";
+
+        let storeData = { categories: ["شواحن", "كابلات", "سماعات", "أخرى"], products: [] };
+        let fileSha = "";
+        let imgMode = 'link';
+
+        window.onload = function() {
+            const token = localStorage.getItem("gh_token_elgoharey");
+            if(token) document.getElementById("githubToken").value = token;
+            fetchData();
+        }
+
+        function switchImgTab(mode) {
+            imgMode = mode;
+            if(mode === 'link') {
+                document.getElementById("linkContainer").style.display = "block";
+                document.getElementById("fileContainer").style.display = "none";
+                document.getElementById("tabLink").classList.add("active");
+                document.getElementById("tabFile").classList.remove("active");
+            } else {
+                document.getElementById("linkContainer").style.display = "none";
+                document.getElementById("fileContainer").style.display = "block";
+                document.getElementById("tabFile").classList.add("active");
+                document.getElementById("tabLink").classList.remove("active");
+            }
+        }
+
+        async function fetchData() {
+            try {
+                const res = await fetch(`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${FILE_PATH}?t=` + new Date().getTime());
+                if(res.ok) {
+                    const data = await res.json();
+                    storeData.products = data.products || [];
+                    storeData.categories = data.categories || ["شواحن", "كابلات", "سماعات", "أخرى"];
+                }
+            } catch(e) {}
+
+            try {
+                const apiRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`);
+                if(apiRes.ok) {
+                    const meta = await apiRes.json();
+                    fileSha = meta.sha;
+                }
+            } catch(e) {}
+
+            renderUI();
+        }
+
+        function renderUI() {
+            const box = document.getElementById("categoriesBox");
+            box.innerHTML = "";
+            storeData.categories.forEach((cat, idx) => {
+                box.innerHTML += `<div class="tag"><span>${cat}</span> ${storeData.categories.length > 1 ? `<button onclick="deleteCat(${idx})">&times;</button>` : ''}</div>`;
+            });
+
+            const select = document.getElementById("prodCategory");
+            select.innerHTML = "";
+            storeData.categories.forEach(cat => {
+                select.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+
+            const tbody = document.getElementById("productsTableBody");
+            tbody.innerHTML = "";
+            if(storeData.products.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b;">لا توجد منتجات.</td></tr>`;
+                return;
+            }
+
+            storeData.products.forEach((p, idx) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><img src="${p.image}" class="table-img" onerror="this.src='https://via.placeholder.com/40'"></td>
+                        <td><b>${p.name}</b></td>
+                        <td>${p.category}</td>
+                        <td>${p.price} جنيه</td>
+                        <td><button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="deleteProd(${idx})"><i class="fas fa-trash"></i></button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function addCategory() {
+            const input = document.getElementById("newCatInput");
+            const val = input.value.trim();
+            if(!val) return alert("أدخل اسم التصنيف");
+            if(storeData.categories.includes(val)) return alert("التصنيف موجود مسبقاً");
+            storeData.categories.push(val);
+            input.value = "";
+            renderUI();
+            saveToGitHub("إضافة تصنيف: " + val);
+        }
+
+        function deleteCat(idx) {
+            storeData.categories.splice(idx, 1);
+            renderUI();
+            saveToGitHub("حذف تصنيف");
+        }
+
+        function addProduct() {
+            const name = document.getElementById("prodName").value.trim();
+            const price = document.getElementById("prodPrice").value.trim();
+            const category = document.getElementById("prodCategory").value;
+
+            if(!name || !price) return alert("الرجاء إدخال اسم المنتج والسعر");
+
+            if(imgMode === 'link') {
+                const img = document.getElementById("prodImageLink").value.trim();
+                if(!img) return alert("أدخل رابط الصورة");
+                proceedAdd(name, price, category, img);
+            } else {
+                const fileInput = document.getElementById("prodImageFile");
+                if(fileInput.files.length === 0) return alert("اختر صورة من الجهاز");
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    proceedAdd(name, price, category, e.target.result);
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+
+        function proceedAdd(name, price, category, image) {
+            storeData.products.unshift({ name, price, category, image });
+            document.getElementById("prodName").value = "";
+            document.getElementById("prodPrice").value = "";
+            document.getElementById("prodImageLink").value = "";
+            document.getElementById("prodImageFile").value = "";
+            renderUI();
+            saveToGitHub("إضافة منتج: " + name);
+        }
+
+        function deleteProd(idx) {
+            if(confirm("هل أنت متأكد من الحذف؟")) {
+                storeData.products.splice(idx, 1);
+                renderUI();
+                saveToGitHub("حذف منتج");
+            }
+        }
+
+        async function saveToGitHub(msg) {
+            const token = document.getElementById("githubToken").value.trim();
+            const statusEl = document.getElementById("statusMsg");
+
+            if(!token) {
+                statusEl.style.background = "#fee2e2";
+                statusEl.style.color = "#991b1b";
+                statusEl.innerText = "⚠️ أدخل GitHub Token لحفظ التعديلات مباشرة.";
+                return;
+            }
+
+            localStorage.setItem("gh_token_elgoharey", token);
+            statusEl.style.background = "#e0f2fe";
+            statusEl.style.color = "#0369a1";
+            statusEl.innerText = "⏳ جاري حفظ التحديثات في المستودع...";
+
+            try {
+                const shaRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`);
+                if(shaRes.ok) {
+                    const meta = await shaRes.json();
+                    fileSha = meta.sha;
+                }
+
+                const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(storeData, null, 2))));
+                const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+                    method: "PUT",
+                    headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: msg, content: encoded, sha: fileSha })
+                });
+
+                if(res.ok) {
+                    const json = await res.json();
+                    fileSha = json.content.sha;
+                    statusEl.style.background = "#dcfce7";
+                    statusEl.style.color = "#166534";
+                    statusEl.innerText = "✅ تم تحديث المتجر بنجاح!";
+                    setTimeout(() => { statusEl.innerText = ""; statusEl.style.background = "transparent"; }, 4000);
+                } else {
+                    statusEl.style.background = "#fee2e2";
+                    statusEl.style.color = "#991b1b";
+                    statusEl.innerText = "❌ فشل الحفظ: تأكد من صحة الرمز وصلاحياته.";
+                }
+            } catch(e) {
+                statusEl.style.background = "#fee2e2";
+                statusEl.style.color = "#991b1b";
+                statusEl.innerText = "❌ حدث خطأ في الاتصال.";
+            }
+        }
+    </script>
+</body>
+</html>

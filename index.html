@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elgoharey Store - المتجر</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #2563eb; --bg: #f8fafc; --text: #1e293b; }
+        body { font-family: 'Tahoma', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; direction: rtl; }
+        header { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .logo { font-size: 20px; font-weight: bold; color: var(--primary); }
+        .admin-btn { background: var(--primary); color: white; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        .filters { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+        .filter-btn { background: white; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .product-card { background: white; border-radius: 10px; padding: 15px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .product-img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; background: #f1f5f9; }
+        .product-title { font-weight: bold; font-size: 15px; margin-bottom: 8px; }
+        .product-price { color: var(--primary); font-weight: bold; font-size: 16px; }
+        .product-cat { font-size: 12px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo"><i class="fas fa-store"></i> Elgoharey Store</div>
+        <a href="admin.html" class="admin-btn"><i class="fas fa-cog"></i> لوحة التحكم</a>
+    </header>
+
+    <div class="container">
+        <div class="filters" id="categoriesFilters"></div>
+        <div class="products-grid" id="productsContainer">
+            <p style="text-align: center; color: #64748b; grid-column: 1/-1;">جاري تحميل المنتجات...</p>
+        </div>
+    </div>
+
+    <script>
+        let allProducts = [];
+
+        async function loadStoreData() {
+            try {
+                const res = await fetch('data.json?t=' + new Date().getTime());
+                if(res.ok) {
+                    const data = await res.json();
+                    allProducts = data.products || [];
+                    renderCategories(data.categories || []);
+                    renderProducts(allProducts);
+                }
+            } catch(e) {
+                document.getElementById("productsContainer").innerHTML = `<p style="text-align:center; color:red; grid-column:1/-1;">عذراً، تعذر تحميل بيانات المنتجات.</p>`;
+            }
+        }
+
+        function renderCategories(categories) {
+            const container = document.getElementById("categoriesFilters");
+            container.innerHTML = `<button class="filter-btn active" onclick="filterByCategory('الكل', this)">الكل</button>`;
+            categories.forEach(cat => {
+                container.innerHTML += `<button class="filter-btn" onclick="filterByCategory('${cat}', this)">${cat}</button>`;
+            });
+        }
+
+        function filterByCategory(category, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            if(category === 'الكل') {
+                renderProducts(allProducts);
+            } else {
+                const filtered = allProducts.filter(p => p.category === category);
+                renderProducts(filtered);
+            }
+        }
+
+        function renderProducts(products) {
+            const container = document.getElementById("productsContainer");
+            container.innerHTML = "";
+
+            if(products.length === 0) {
+                container.innerHTML = `<p style="text-align: center; color: #64748b; grid-column: 1/-1;">لا توجد منتجات مضافة حالياً.</p>`;
+                return;
+            }
+
+            products.forEach(p => {
+                container.innerHTML += `
+                    <div class="product-card">
+                        <img src="${p.image}" class="product-img" onerror="this.src='https://via.placeholder.com/200?text=No+Image'">
+                        <span class="product-cat">${p.category}</span>
+                        <div class="product-title">${p.name}</div>
+                        <div class="product-price">${p.price} جنيه</div>
+                    </div>
+                `;
+            });
+        }
+
+        loadStoreData();
+    </script>
+</body>
+</html>
