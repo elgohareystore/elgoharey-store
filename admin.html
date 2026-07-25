@@ -9,8 +9,8 @@
         :root { --primary: #2563eb; --danger: #ef4444; --bg: #f8fafc; --text: #1e293b; }
         body { font-family: 'Tahoma', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; direction: rtl; }
         header { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .logo { font-size: 20px; font-weight: bold; color: var(--primary); }
-        .store-link { color: #64748b; text-decoration: none; font-size: 14px; }
+        .logo { font-size: 20px; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .store-link { color: #64748b; text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 5px; }
         .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
         .card { background: white; border-radius: 10px; padding: 25px; margin-bottom: 25px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .card h2 { margin-top: 0; font-size: 18px; color: var(--primary); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; }
@@ -21,7 +21,7 @@
         .btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
         .btn-danger { background: var(--danger); }
         .tags-box { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
-        .tag { background: #f1f5f9; padding: 5px 12px; border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+        .tag { background: #f1f5f9; padding: 5px 12px; border-radius: 20px; font-size: 13px; display: flex; align-items: center; gap: 6px; border: 1px solid #cbd5e1; }
         .tag button { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
         th, td { padding: 10px; text-align: right; border-bottom: 1px solid #e2e8f0; }
@@ -48,7 +48,7 @@
                 <label>GitHub Personal Access Token:</label>
                 <input type="password" id="githubToken" placeholder="ألصق الرمز هنا...">
             </div>
-            <p style="font-size: 12px; color: #64748b; margin-top: 5px;">* يتم الحفظ تلقائياً في المتصفح لتسهيل التحديثات المباشرة.</p>
+            <p style="font-size: 12px; color: #64748b; margin-top: 5px;">* يتم الحفظ تلقائياً في المتصفح لتسهيل التحديثات المباشرة للمتجر.</p>
         </div>
 
         <!-- إدارة التصنيفات -->
@@ -120,7 +120,7 @@
         const REPO_NAME = "elgoharey-store";
         const FILE_PATH = "data.json";
 
-        let storeData = { categories: ["شواحن", "كابلات", "سماعات", "أخرى"], products: [] };
+        let storeData = { categories: [], products: [] };
         let fileSha = "";
         let imgMode = 'link';
 
@@ -152,8 +152,12 @@
                     const data = await res.json();
                     storeData.products = data.products || [];
                     storeData.categories = data.categories || ["شواحن", "كابلات", "سماعات", "أخرى"];
+                } else {
+                    storeData.categories = ["شواحن", "كابلات", "سماعات", "أخرى"];
                 }
-            } catch(e) {}
+            } catch(e) {
+                storeData.categories = ["شواحن", "كابلات", "سماعات", "أخرى"];
+            }
 
             try {
                 const apiRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`);
@@ -167,6 +171,7 @@
         }
 
         function renderUI() {
+            // Categories
             const box = document.getElementById("categoriesBox");
             box.innerHTML = "";
             storeData.categories.forEach((cat, idx) => {
@@ -179,10 +184,11 @@
                 select.innerHTML += `<option value="${cat}">${cat}</option>`;
             });
 
+            // Products Table
             const tbody = document.getElementById("productsTableBody");
             tbody.innerHTML = "";
             if(storeData.products.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b;">لا توجد منتجات.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b;">لا توجد منتجات مضافة حالياً.</td></tr>`;
                 return;
             }
 
@@ -263,7 +269,7 @@
             if(!token) {
                 statusEl.style.background = "#fee2e2";
                 statusEl.style.color = "#991b1b";
-                statusEl.innerText = "⚠️ أدخل GitHub Token لحفظ التعديلات مباشرة.";
+                statusEl.innerText = "⚠️ أدخل GitHub Token لحفظ التعديلات مباشرة في المتجر.";
                 return;
             }
 
