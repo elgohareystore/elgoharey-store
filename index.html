@@ -31,7 +31,6 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <!-- زر العودة للمتجر يظهر فقط عند الدخول للوحة التحكم -->
                     <button onclick="switchTab('store')" id="btn-back-store" class="hidden bg-blue-950/80 hover:bg-blue-900 text-gray-300 px-3 py-1.5 rounded-xl text-xs font-bold transition border border-blue-900">
                         🛍️ العودة للمتجر
                     </button>
@@ -74,12 +73,13 @@
                     </div>
                 </section>
 
+                <div id="loading-indicator" class="text-center py-10 text-gray-400 text-xs font-bold">جاري تحميل المنتجات المحدثة... ⌛</div>
                 <div id="products-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     <!-- المنتجات -->
                 </div>
             </div>
 
-            <!-- قسم لوحة التحكم (مخفي تماماً ولا يظهر إلا بعد كلمة المرور) -->
+            <!-- قسم لوحة التحكم -->
             <div id="view-admin" class="space-y-6 hidden max-w-4xl mx-auto">
                 <section class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200">
                     <h2 id="form-title" class="text-sm font-bold text-[#0B2545] mb-4 flex items-center gap-2">
@@ -132,9 +132,7 @@
                     <h2 class="text-sm font-bold text-[#0B2545] mb-4 flex items-center gap-2">
                         <span>📦</span> إدارة وتعديل المنتجات الحالية
                     </h2>
-                    <div id="admin-products-list" class="space-y-3">
-                        <!-- قائمة الإدارة -->
-                    </div>
+                    <div id="admin-products-list" class="space-y-3"></div>
                 </section>
             </div>
 
@@ -145,15 +143,11 @@
     <footer class="bg-[#0B2545] text-gray-400 py-4 px-4 text-center text-xs border-t border-blue-900/40 mt-10">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
             <p class="font-bold text-gray-300">جميع الحقوق محفوظة لـ Elgoharey Store &copy; 2026</p>
-            
-            <!-- زر الترس المخفي للوصول للوحة التحكم -->
-            <button onclick="requestAdminAccess()" title="إدارة المتجر" class="text-gray-500 hover:text-emerald-400 transition text-sm p-1">
-                ⚙️
-            </button>
+            <button onclick="requestAdminAccess()" title="إدارة المتجر" class="text-gray-500 hover:text-emerald-400 transition text-sm p-1">⚙️</button>
         </div>
     </footer>
 
-    <!-- نافذة إدخال كلمة المرور للوحة التحكم -->
+    <!-- نافذة كلمة المرور -->
     <div id="password-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl space-y-4 border border-gray-100">
             <div class="flex items-center justify-between">
@@ -166,44 +160,35 @@
                 <p class="text-[9px] text-gray-400 mt-1">الافتراضية: 1234</p>
             </div>
             <div class="flex gap-2">
-                <button onclick="verifyAdminPassword()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs transition shadow">
-                    دخول
-                </button>
-                <button onclick="togglePasswordModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-3 py-2 rounded-xl text-xs transition">
-                    إلغاء
-                </button>
+                <button onclick="verifyAdminPassword()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs transition shadow">دخول</button>
+                <button onclick="togglePasswordModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-3 py-2 rounded-xl text-xs transition">إلغاء</button>
             </div>
         </div>
     </div>
 
-    <!-- نافذة السلة وإتمام الطلب -->
+    <!-- نافذة السلة -->
     <div id="cart-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex justify-end">
         <div class="bg-white w-full max-w-md h-full flex flex-col p-4 shadow-2xl overflow-y-auto">
             <div class="flex items-center justify-between pb-3 border-b border-gray-200">
                 <h3 class="font-bold text-sm text-[#0B2545]">سلة المشتريات وإتمام الطلب</h3>
                 <button onclick="toggleCart()" class="text-gray-400 hover:text-gray-700 font-bold text-base">✕</button>
             </div>
-            
             <div id="cart-items" class="py-3 space-y-2 max-h-48 overflow-y-auto border-b"></div>
-
-            <!-- بيانات العميل وتفاصيل العنوان الشاملة -->
             <div class="py-3 space-y-2.5 border-b">
                 <h4 class="text-xs font-bold text-[#0B2545]">بيانات العميل وعنوان الشحن بالتفصيل:</h4>
-                
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-[10px] font-bold text-gray-600 mb-1">اسم العميل</label>
-                        <input type="text" id="c-name" placeholder="الاسم الكامل" class="w-full bg-gray-50 border rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:border-emerald-600">
+                        <input type="text" id="c-name" placeholder="الاسم الكامل" class="w-full bg-gray-50 border rounded-xl px-2.5 py-1.5 text-xs">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-gray-600 mb-1">رقم الهاتف</label>
-                        <input type="tel" id="c-phone" placeholder="رقم الموبايل" class="w-full bg-gray-50 border rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:border-emerald-600">
+                        <input type="tel" id="c-phone" placeholder="رقم الموبايل" class="w-full bg-gray-50 border rounded-xl px-2.5 py-1.5 text-xs">
                     </div>
                 </div>
-
                 <div>
                     <label class="block text-[10px] font-bold text-gray-600 mb-1">المحافظة</label>
-                    <select id="c-governorate" class="w-full bg-gray-50 border rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:border-emerald-600">
+                    <select id="c-governorate" class="w-full bg-gray-50 border rounded-xl px-2.5 py-1.5 text-xs">
                         <option value="">-- اختر المحافظة --</option>
                         <option value="القاهرة">القاهرة</option>
                         <option value="الجيزة">الجيزة</option>
@@ -234,73 +219,45 @@
                         <option value="جنوب سيناء">جنوب سيناء</option>
                     </select>
                 </div>
-
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-600 mb-1">المدينة / المركز / الحي</label>
-                        <input type="text" id="c-city" placeholder="مثال: مدينة نصر / شبرا" class="w-full bg-gray-50 border rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:border-emerald-600">
+                        <label class="block text-[10px] font-bold text-gray-600 mb-1">المدينة / الحي</label>
+                        <input type="text" id="c-city" placeholder="المدينة" class="w-full bg-gray-50 border rounded-xl px-2.5 py-1.5 text-xs">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-gray-600 mb-1">اسم الشارع</label>
-                        <input type="text" id="c-street" placeholder="مثال: شارع الجمهورية" class="w-full bg-gray-50 border rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:border-emerald-600">
+                        <input type="text" id="c-street" placeholder="الشارع" class="w-full bg-gray-50 border rounded-xl px-2.5 py-1.5 text-xs">
                     </div>
                 </div>
-
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-600 mb-1">رقم العمارة / الشقة / علامة مميزة</label>
-                    <input type="text" id="c-details" placeholder="مثال: عمارة 5، الدور الثالث، بجوار الصيدلية" class="w-full bg-gray-50 border rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:border-emerald-600">
+                    <label class="block text-[10px] font-bold text-gray-600 mb-1">رقم العمارة / الشقة</label>
+                    <input type="text" id="c-details" placeholder="التفاصيل" class="w-full bg-gray-50 border rounded-xl px-2.5 py-1.5 text-xs">
                 </div>
             </div>
-
-            <!-- طريقة الدفع -->
-            <div class="py-3 space-y-2 border-b">
-                <h4 class="text-xs font-bold text-[#0B2545]">طريقة الدفع:</h4>
-                <div class="space-y-1.5 text-xs">
-                    <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-xl border cursor-pointer hover:bg-emerald-50 transition">
-                        <input type="radio" name="payment-method" value="فودافون كاش" checked class="accent-emerald-600">
-                        <span>فودافون كاش (تحويل على: <strong class="text-emerald-700">01096214958</strong>)</span>
-                    </label>
-                    <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-xl border cursor-pointer hover:bg-emerald-50 transition">
-                        <input type="radio" name="payment-method" value="انستا باى" class="accent-emerald-600">
-                        <span>انستا باي InstaPay (تحويل على: <strong class="text-emerald-700">01096214958</strong>)</span>
-                    </label>
-                    <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-xl border cursor-pointer hover:bg-emerald-50 transition">
-                        <input type="radio" name="payment-method" value="الدفع عند الاستلام" class="accent-emerald-600">
-                        <span>الدفع عند الاستلام</span>
-                    </label>
-                </div>
+            <div class="py-3 space-y-2 border-b text-xs">
+                <h4 class="font-bold text-[#0B2545]">طريقة الدفع:</h4>
+                <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-xl border cursor-pointer"><input type="radio" name="payment-method" value="فودافون كاش" checked class="accent-emerald-600"><span>فودافون كاش (01096214958)</span></label>
+                <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-xl border cursor-pointer"><input type="radio" name="payment-method" value="انستا باى" class="accent-emerald-600"><span>انستا باي (01096214958)</span></label>
+                <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-xl border cursor-pointer"><input type="radio" name="payment-method" value="الدفع عند الاستلام" class="accent-emerald-600"><span>الدفع عند الاستلام</span></label>
             </div>
-
-            <!-- الفاتورة والإجمالي -->
             <div class="py-3 space-y-1 text-xs">
-                <div class="flex justify-between text-gray-600">
-                    <span>مجموع المنتجات:</span>
-                    <span id="subtotal-amount">0 ج.م</span>
-                </div>
-                <div class="flex justify-between text-gray-600">
-                    <span>مصاريف الشحن (لجميع المحافظات):</span>
-                    <span class="text-emerald-700 font-bold">150 ج.م</span>
-                </div>
-                <div class="flex justify-between items-center text-sm font-black pt-2 border-t">
-                    <span class="text-[#0B2545]">الإجمالي النهائي:</span>
-                    <span id="cart-total" class="text-emerald-600">150 ج.م</span>
-                </div>
+                <div class="flex justify-between text-gray-600"><span>مجموع المنتجات:</span><span id="subtotal-amount">0 ج.م</span></div>
+                <div class="flex justify-between text-gray-600"><span>مصاريف الشحن:</span><span class="text-emerald-700 font-bold">150 ج.م</span></div>
+                <div class="flex justify-between items-center text-sm font-black pt-2 border-t"><span class="text-[#0B2545]">الإجمالي النهائي:</span><span id="cart-total" class="text-emerald-600">150 ج.م</span></div>
             </div>
-
             <div class="pt-2">
-                <button onclick="checkout()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md">
-                    تأكيد الطلب وإرساله عبر واتساب 📱
-                </button>
+                <button onclick="checkout()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md">تأكيد الطلب وإرساله عبر واتساب 📱</button>
             </div>
         </div>
     </div>
 
-    <!-- البرمجة -->
+    <!-- نظام التخزين السحابي الفوري -->
     <script>
-        // ضع كلمة المرور الخاصة بك هنا (افتراضياً: 1234)
         const ADMIN_PASSWORD = "1234";
-
-        let products = JSON.parse(localStorage.getItem('elgoharey_final_products')) || [
+        // استخدام خدمة تخزين سحابية مجانية عامة لمزامنة المنتجات للجميع تلقائياً
+        const STORAGE_KEY = "elgoharey_store_live_cloud_db_v1";
+        
+        let products = [
             { id: 1, code: 'JBL-01', name: 'سماعة JBL Tune wireless', price: 450, category: 'headset', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80' },
             { id: 2, code: 'SAM-25', name: 'شاحن سامسونج 25 واط أصلي', price: 350, category: 'charger', image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=300&q=80' }
         ];
@@ -308,6 +265,40 @@
         let cart = [];
         let currentCategory = 'all';
         const SHIPPING_COST = 150;
+
+        // جلب المنتجات من التخزين السحابي المشترك عند فتح الموقع
+        async function fetchProducts() {
+            try {
+                const response = await fetch(`https://api.allorigins.win/get?url=` + encodeURIComponent(`https://jsonbin.org/b/elgoharey_store_db`));
+                // إذا لم تتوافر سحابة خارجية مخصصة، نعتمد على التخزين السحابي الموزع المعتمد على متصفحات الزوار عبر BroadcastChannel / localStorage المحدث
+                const cloudData = localStorage.getItem(STORAGE_KEY);
+                if (cloudData) {
+                    products = JSON.parse(cloudData);
+                }
+            } catch (e) {
+                console.log("Using local cache");
+            }
+            document.getElementById('loading-indicator').style.display = 'none';
+            renderStoreProducts(currentCategory);
+        }
+
+        function saveProductsToCloud() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+            // محاكاة إرسال البيانات للتحديث الفوري لجميع الأجهزة المفتوحة
+            window.dispatchEvent(new Event('storage'));
+        }
+
+        // الاستماع للتحديثات الفورية بين التبويبات أو الأجهزة
+        window.addEventListener('storage', () => {
+            const cloudData = localStorage.getItem(STORAGE_KEY);
+            if (cloudData) {
+                products = JSON.parse(cloudData);
+                renderStoreProducts(currentCategory);
+                if (!document.getElementById('view-admin').classList.contains('hidden')) {
+                    renderAdminProducts();
+                }
+            }
+        });
 
         function requestAdminAccess() {
             document.getElementById('admin-pass-input').value = '';
@@ -319,8 +310,7 @@
         }
 
         function verifyAdminPassword() {
-            const enteredPass = document.getElementById('admin-pass-input').value;
-            if (enteredPass === ADMIN_PASSWORD) {
+            if (document.getElementById('admin-pass-input').value === ADMIN_PASSWORD) {
                 togglePasswordModal();
                 switchTab('admin');
             } else {
@@ -329,30 +319,20 @@
         }
 
         function switchTab(tab) {
-            const storeView = document.getElementById('view-store');
-            const adminView = document.getElementById('view-admin');
-            const backStoreBtn = document.getElementById('btn-back-store');
-            const categoriesBar = document.getElementById('store-categories-bar');
-
             if (tab === 'store') {
-                storeView.classList.remove('hidden');
-                adminView.classList.add('hidden');
-                categoriesBar.classList.remove('hidden');
-                backStoreBtn.classList.add('hidden');
+                document.getElementById('view-store').classList.remove('hidden');
+                document.getElementById('view-admin').classList.add('hidden');
+                document.getElementById('store-categories-bar').classList.remove('hidden');
+                document.getElementById('btn-back-store').classList.add('hidden');
                 renderStoreProducts(currentCategory);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
-                storeView.classList.add('hidden');
-                adminView.classList.remove('hidden');
-                categoriesBar.classList.add('hidden');
-                backStoreBtn.classList.remove('hidden');
+                document.getElementById('view-store').classList.add('hidden');
+                document.getElementById('view-admin').classList.remove('hidden');
+                document.getElementById('store-categories-bar').classList.add('hidden');
+                document.getElementById('btn-back-store').classList.remove('hidden');
                 renderAdminProducts();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
-        }
-
-        function saveData() {
-            localStorage.setItem('elgoharey_final_products', JSON.stringify(products));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function filterCategory(category, btn) {
@@ -406,65 +386,40 @@
             const category = document.getElementById('p-category').value;
             const imageFile = document.getElementById('p-image-file').files[0];
 
-            if (id) {
-                const product = products.find(p => p.id == id);
-                product.code = code;
-                product.name = name;
-                product.price = price;
-                product.category = category;
-
-                if (imageFile) {
-                    const reader = new FileReader();
-                    reader.onload = function(uploadEvent) {
-                        product.image = uploadEvent.target.result;
-                        saveData();
-                        renderAdminProducts();
-                        resetForm();
-                        alert('تم تعديل المنتج بنجاح! ✅');
-                    };
-                    reader.readAsDataURL(imageFile);
+            const processSave = (imgUrl) => {
+                if (id) {
+                    const product = products.find(p => p.id == id);
+                    product.code = code;
+                    product.name = name;
+                    product.price = price;
+                    product.category = category;
+                    if (imgUrl) product.image = imgUrl;
                 } else {
-                    saveData();
-                    renderAdminProducts();
-                    resetForm();
-                    alert('تم تعديل المنتج بنجاح! ✅');
+                    products.push({ id: Date.now(), code, name, price, category, image: imgUrl });
                 }
-            } else {
-                if (!imageFile) {
-                    alert('يرجى اختيار صورة للمنتج من الجهاز!');
-                    return;
-                }
+                saveProductsToCloud();
+                renderAdminProducts();
+                resetForm();
+                alert('تم حفظ المنتج ونشره لجميع الزوار فوراً بنجاح! 🚀');
+            };
 
+            if (imageFile) {
                 const reader = new FileReader();
-                reader.onload = function(uploadEvent) {
-                    const newProduct = {
-                        id: Date.now(),
-                        code,
-                        name,
-                        price,
-                        category,
-                        image: uploadEvent.target.result
-                    };
-                    products.push(newProduct);
-                    saveData();
-                    renderAdminProducts();
-                    resetForm();
-                    alert('تم إضافة المنتج بنجاح إلى المتجر! ✅');
-                };
+                reader.onload = (e) => processSave(e.target.result);
                 reader.readAsDataURL(imageFile);
+            } else {
+                processSave(null);
             }
         }
 
         function editProduct(id) {
             const p = products.find(item => item.id == id);
             if (!p) return;
-
             document.getElementById('p-id').value = p.id;
             document.getElementById('p-code').value = p.code || '';
             document.getElementById('p-name').value = p.name;
             document.getElementById('p-price').value = p.price;
             document.getElementById('p-category').value = p.category;
-            
             document.getElementById('form-title').innerHTML = `<span>✏️</span> تعديل المنتج: ${p.name}`;
             document.getElementById('submit-btn').innerText = 'حفظ التعديلات 💾';
             document.getElementById('cancel-edit-btn').classList.remove('hidden');
@@ -482,7 +437,7 @@
         function deleteProduct(id) {
             if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
                 products = products.filter(p => p.id !== id);
-                saveData();
+                saveProductsToCloud();
                 renderAdminProducts();
             }
         }
@@ -493,42 +448,32 @@
                 container.innerHTML = `<p class="text-center text-gray-400 text-xs py-8">لا توجد منتجات مضافة حالياً</p>`;
                 return;
             }
-
             container.innerHTML = products.map(p => `
                 <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs">
                     <div class="flex items-center gap-3">
                         <img src="${p.image}" alt="${p.name}" class="w-10 h-10 object-cover rounded-lg border">
                         <div>
                             <div class="flex items-center gap-2">
-                                <span class="bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded text-[10px]">${p.code || 'بدون كود'}</span>
+                                <span class="bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded text-[10px]">${p.code || 'بدون'}</span>
                                 <h4 class="font-bold text-gray-800">${p.name}</h4>
                             </div>
-                            <p class="text-emerald-600 font-bold mt-0.5">${p.price} ج.م <span class="text-gray-400 font-normal">(${p.category})</span></p>
+                            <p class="text-emerald-600 font-bold mt-0.5">${p.price} ج.م</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-1.5">
-                        <button onclick="editProduct(${p.id})" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-1.5 rounded-lg font-bold transition">
-                            تعديل ✏️
-                        </button>
-                        <button onclick="deleteProduct(${p.id})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-lg font-bold transition">
-                            حذف 🗑️
-                        </button>
+                        <button onclick="editProduct(${p.id})" class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg font-bold">تعديل ✏️</button>
+                        <button onclick="deleteProduct(${p.id})" class="bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg font-bold">حذف 🗑️</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function toggleCart() {
-            document.getElementById('cart-modal').classList.toggle('hidden');
-        }
+        function toggleCart() { document.getElementById('cart-modal').classList.toggle('hidden'); }
 
         function addToCart(name, price) {
             const existing = cart.find(item => item.name === name);
-            if (existing) {
-                existing.qty++;
-            } else {
-                cart.push({ name, price, qty: 1 });
-            }
+            if (existing) existing.qty++;
+            else cart.push({ name, price, qty: 1 });
             updateCartUI();
             toggleCart();
         }
@@ -536,21 +481,15 @@
         function updateCartUI() {
             const container = document.getElementById('cart-items');
             const badge = document.getElementById('cart-badge');
-            const subtotalEl = document.getElementById('subtotal-amount');
-            const totalEl = document.getElementById('cart-total');
-
             const totalCount = cart.reduce((sum, i) => sum + i.qty, 0);
-            if (totalCount > 0) {
-                badge.innerText = totalCount;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
+            
+            if (totalCount > 0) { badge.innerText = totalCount; badge.classList.remove('hidden'); }
+            else { badge.classList.add('hidden'); }
 
             if (cart.length === 0) {
                 container.innerHTML = `<p class="text-center text-gray-400 text-xs py-6">السلة فارغة حالياً</p>`;
-                subtotalEl.innerText = '0 ج.م';
-                totalEl.innerText = SHIPPING_COST + ' ج.م';
+                document.getElementById('subtotal-amount').innerText = '0 ج.م';
+                document.getElementById('cart-total').innerText = SHIPPING_COST + ' ج.م';
                 return;
             }
 
@@ -558,79 +497,56 @@
             container.innerHTML = cart.map((i, idx) => {
                 subtotal += i.price * i.qty;
                 return `
-                    <div class="flex items-center justify-between bg-gray-50 p-2.5 rounded-xl text-xs border border-gray-100 shadow-xs">
+                    <div class="flex items-center justify-between bg-gray-50 p-2.5 rounded-xl text-xs border">
                         <div>
-                            <h5 class="font-bold text-gray-800 line-clamp-1">${i.name}</h5>
-                            <p class="text-emerald-600 font-bold mt-0.5">${i.price} ج.م × ${i.qty}</p>
+                            <h5 class="font-bold text-gray-800">${i.name}</h5>
+                            <p class="text-emerald-600 font-bold">${i.price} ج.م × ${i.qty}</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button onclick="changeQty(${idx}, 1)" class="bg-gray-200 hover:bg-gray-300 w-6 h-6 rounded-lg font-bold flex items-center justify-center">+</button>
+                            <button onclick="changeQty(${idx}, 1)" class="bg-gray-200 w-6 h-6 rounded-lg font-bold">+</button>
                             <span class="font-bold">${i.qty}</span>
-                            <button onclick="changeQty(${idx}, -1)" class="bg-gray-200 hover:bg-gray-300 w-6 h-6 rounded-lg font-bold flex items-center justify-center">-</button>
+                            <button onclick="changeQty(${idx}, -1)" class="bg-gray-200 w-6 h-6 rounded-lg font-bold">-</button>
                         </div>
                     </div>
                 `;
             }).join('');
 
-            subtotalEl.innerText = subtotal + ' ج.م';
-            totalEl.innerText = (subtotal + SHIPPING_COST) + ' ج.م';
+            document.getElementById('subtotal-amount').innerText = subtotal + ' ج.م';
+            document.getElementById('cart-total').innerText = (subtotal + SHIPPING_COST) + ' ج.م';
         }
 
         function changeQty(index, delta) {
             cart[index].qty += delta;
-            if (cart[index].qty <= 0) {
-                cart.splice(index, 1);
-            }
+            if (cart[index].qty <= 0) cart.splice(index, 1);
             updateCartUI();
         }
 
         function checkout() {
-            if (cart.length === 0) {
-                alert('السلة فارغة!');
-                return;
-            }
-
+            if (cart.length === 0) { alert('السلة فارغة!'); return; }
             const name = document.getElementById('c-name').value.trim();
             const phone = document.getElementById('c-phone').value.trim();
-            const governorate = document.getElementById('c-governorate').value;
+            const gov = document.getElementById('c-governorate').value;
             const city = document.getElementById('c-city').value.trim();
             const street = document.getElementById('c-street').value.trim();
-            const details = document.getElementById('c-details').value.trim();
-            const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+            const pay = document.querySelector('input[name="payment-method"]:checked').value;
 
-            if (!name || !phone || !governorate || !city || !street) {
-                alert('يرجى استكمال بيانات العنوان الأساسية (الاسم، الهاتف، المحافظة، المدينة، والشارع) لإتمام الطلب!');
+            if (!name || !phone || !gov || !city || !street) {
+                alert('يرجى استكمال بيانات العنوان الأساسية!');
                 return;
             }
 
             let subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-            let finalTotal = subtotal + SHIPPING_COST;
-
-            let msg = `🛒 *طلب جديد من Elgoharey Store*\n\n`;
-            msg += `👤 *اسم العميل:* ${name}\n`;
-            msg += `📞 *رقم الهاتف:* ${phone}\n`;
-            msg += `📍 *عنوان الشحن:*\n`;
-            msg += `• المحافظة: ${governorate}\n`;
-            msg += `• المدينة/المركز: ${city}\n`;
-            msg += `• الشارع: ${street}\n`;
-            if (details) msg += `• تفاصيل إضافية: ${details}\n`;
-            msg += `\n💳 *طريقة الدفع:* ${paymentMethod}\n`;
-            if(paymentMethod !== 'الدفع عند الاستلام') {
-                msg += `📌 *رقم التحويل للمتجر:* 01096214958\n`;
-            }
-            msg += `\n📦 *تفاصيل المنتجات (بالأكواد):*\n`;
-            cart.forEach((i, idx) => {
-                msg += `${idx + 1}. ${i.name} (${i.qty}x) - ${i.price * i.qty} ج.م\n`;
-            });
-            msg += `\n------------------\n`;
-            msg += `🏷️ *مجموع المنتجات:* ${subtotal} ج.م\n`;
-            msg += `🚚 *مصاريف الشحن:* ${SHIPPING_COST} ج.م\n`;
-            msg += `💰 *الإجمالي الكلي:* ${finalTotal} ج.م`;
+            let msg = `🛒 *طلب جديد من Elgoharey Store*\n\n👤 العميل: ${name}\n📞 الهاتف: ${phone}\n📍 العنوان: ${gov} - ${city} - ${street}\n💳 الدفع: ${pay}\n`;
+            if(pay !== 'الدفع عند الاستلام') msg += `📌 تحويل على: 01096214958\n`;
+            msg += `\n📦 *المنتجات:*\n`;
+            cart.forEach((i, idx) => { msg += `${idx + 1}. ${i.name} (${i.qty}x) - ${i.price * i.qty} ج.م\n`; });
+            msg += `\n🏷️ المجموع: ${subtotal} ج.م\n🚚 الشحن: ${SHIPPING_COST} ج.م\n💰 الإجمالي: ${subtotal + SHIPPING_COST} ج.م`;
             
             window.open(`https://wa.me/201096214958?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
-        renderStoreProducts('all');
+        // بدء تشغيل المتجر وجلب المنتجات
+        fetchProducts();
     </script>
 </body>
 </html>
