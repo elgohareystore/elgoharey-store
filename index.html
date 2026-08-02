@@ -45,13 +45,15 @@
                 <button onclick="filterCategory('other', this)" class="category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-blue-950/80 text-gray-300 hover:text-white shrink-0 transition border border-blue-900">أخرى</button>
             </div>
         </header>
+
         <main class="p-3 md:p-6 pb-12 max-w-7xl mx-auto w-full">
+            <!-- قسم عرض المنتجات للزبائن -->
             <div id="view-store" class="space-y-8">
                 <section class="w-full">
                     <div class="relative rounded-3xl overflow-hidden shadow-xl border border-blue-900/30 bg-gradient-to-r from-[#0B2545] via-[#13315C] to-[#0B2545] p-6 sm:p-10 text-white flex flex-col md:flex-row items-center justify-between gap-6">
                         <div class="z-10 text-center md:text-right space-y-3 max-w-lg">
                             <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[11px] font-bold px-3 py-1 rounded-full inline-block shadow-inner">
-                                ⚡ عروض التقنية الحديثة وشحن لجميع محافظات مصر
+                                ⚡ عروض التقنية الحديثة وشحن لجميع محافظات مصر (150 ج.م)
                             </span>
                             <h2 class="text-2xl sm:text-4xl font-black tracking-tight">
                                 Elgoharey <span class="text-emerald-400">Store</span>
@@ -65,6 +67,8 @@
                 <div id="loading-indicator" class="text-center py-10 text-gray-400 text-xs font-bold">جاري تحميل المنتجات المحدثة... ⌛</div>
                 <div id="products-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
             </div>
+
+            <!-- لوحة التحكم للإدارة -->
             <div id="view-admin" class="space-y-6 hidden max-w-4xl mx-auto">
                 <section class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200">
                     <h2 id="form-title" class="text-sm font-bold text-[#0B2545] mb-4 flex items-center gap-2">
@@ -116,12 +120,15 @@
             </div>
         </main>
     </div>
+
     <footer class="bg-[#0B2545] text-gray-400 py-4 px-4 text-center text-xs border-t border-blue-900/40 mt-10">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
             <p class="font-bold text-gray-300">جميع الحقوق محفوظة لـ Elgoharey Store &copy; 2026</p>
             <button onclick="requestAdminAccess()" title="إدارة المتجر" class="text-gray-500 hover:text-emerald-400 transition text-sm p-1">⚙️</button>
         </div>
     </footer>
+
+    <!-- نافذة كلمة المرور -->
     <div id="password-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl space-y-4 border border-gray-100">
             <div class="flex items-center justify-between">
@@ -139,6 +146,294 @@
             </div>
         </div>
     </div>
+
+    <!-- نافذة السلة الشاملة -->
     <div id="cart-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex justify-end">
         <div class="bg-white w-full max-w-md h-full flex flex-col p-4 shadow-2xl overflow-y-auto">
-            <div class="flex items-center justify-between pb-3 border-b border-gray
+            <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+                <h3 class="font-bold text-sm text-[#0B2545]">🛒 سلة المشتريات</h3>
+                <button onclick="toggleCart()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">✕</button>
+            </div>
+            <div id="cart-items-container" class="flex-1 py-4 space-y-3 overflow-y-auto"></div>
+            <div class="pt-3 border-t border-gray-100 space-y-3">
+                <div class="flex justify-between text-xs font-bold text-gray-600">
+                    <span>مصاريف الشحن لجميع المحافظات:</span>
+                    <span class="text-[#0B2545]">150 ج.م</span>
+                </div>
+                <div class="flex justify-between text-sm font-black text-[#0B2545]">
+                    <span>الإجمالي النهائي:</span>
+                    <span id="cart-total" class="text-emerald-600">0 ج.م</span>
+                </div>
+                <button onclick="checkoutWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2">
+                    <span>إرسال الطلب عبر واتساب</span>
+                    <span>💬</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ضع رابط الـ Raw الخاص بك هنا بين العلامتين
+        const GIST_URL = "رابط_الـ_Raw_الخاص_بك_هنا";
+
+        let products = [];
+        let cart = JSON.parse(localStorage.getItem('eg_cart')) || [];
+        let currentCategory = 'all';
+
+        // جلب المنتجات عند فتح الصفحة
+        async function fetchProducts() {
+            try {
+                const response = await fetch(GIST_URL + '?t=' + new Date().getTime());
+                if (!response.ok) throw new Error("فشل الجلب");
+                products = await response.json();
+                document.getElementById('loading-indicator').style.display = 'none';
+                renderStore();
+                renderAdminList();
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loading-indicator').innerHTML = "⚠️ تعذر جلب المنتجات. تأكد من صحة رابط الـ Gist.";
+            }
+        }
+
+        // عرض المتجر مع تطبيق الفلترة حسب القسم
+        function renderStore() {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '';
+
+            let filtered = products;
+            if (currentCategory !== 'all') {
+                filtered = products.filter(p => p.category === currentCategory);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400 text-xs font-bold">لا توجد منتجات في هذا القسم حالياً.</div>`;
+                return;
+            }
+
+            filtered.forEach(p => {
+                container.innerHTML += `
+                    <div class="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm flex flex-col justify-between group hover:shadow-md transition">
+                        <div>
+                            <div class="w-full h-36 bg-gray-50 rounded-xl overflow-hidden mb-2 relative">
+                                <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                <span class="absolute top-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[9px] font-bold px-2 py-0.5 rounded-md">${p.code}</span>
+                            </div>
+                            <h3 class="font-bold text-xs text-gray-800 line-clamp-1 mb-1">${p.name}</h3>
+                        </div>
+                        <div class="pt-2 border-t border-gray-50 flex items-center justify-between">
+                            <span class="font-black text-emerald-600 text-xs">${p.price} ج.م</span>
+                            <button onclick="addToCart(${p.id})" class="bg-[#0B2545] hover:bg-blue-900 text-white px-3 py-1.5 rounded-xl text-[10px] font-bold transition shadow-sm">
+                                أضف للسلة
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // تفعيل الأقسام وتغيير الألوان عند الضغط
+        function filterCategory(cat, btnElement) {
+            currentCategory = cat;
+            
+            // تحديث تصميم أزرار الأقسام
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.className = "category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-blue-950/80 text-gray-300 hover:text-white shrink-0 transition border border-blue-900";
+            });
+            btnElement.className = "category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-600 text-white shrink-0 transition shadow-sm";
+
+            renderStore();
+        }
+
+        // سلة المشتريات
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            localStorage.setItem('eg_cart', JSON.stringify(cart));
+            const badge = document.getElementById('cart-badge');
+            const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+            
+            if (totalItems > 0) {
+                badge.innerText = totalItems;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            const container = document.getElementById('cart-items-container');
+            container.innerHTML = '';
+            let subtotal = 0;
+
+            if (cart.length === 0) {
+                container.innerHTML = `<p class="text-center text-gray-400 text-xs py-10">السلة فارغة حالياً</p>`;
+            } else {
+                cart.forEach((item, index) => {
+                    subtotal += item.price * item.qty;
+                    container.innerHTML += `
+                        <div class="flex items-center justify-between bg-gray-50 p-2.5 rounded-xl border border-gray-100 text-xs">
+                            <div class="flex items-center gap-2">
+                                <img src="${item.image}" class="w-10 h-10 object-cover rounded-lg">
+                                <div>
+                                    <h4 class="font-bold text-gray-800 line-clamp-1">${item.name}</h4>
+                                    <span class="text-emerald-600 font-bold">${item.price} ج.م</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="changeQty(${index}, 1)" class="w-6 h-6 bg-white border rounded-md font-bold shadow-xs">+</button>
+                                <span class="font-bold text-xs">${item.qty}</span>
+                                <button onclick="changeQty(${index}, -1)" class="w-6 h-6 bg-white border rounded-md font-bold shadow-xs">-</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            const shipping = cart.length > 0 ? 150 : 0;
+            document.getElementById('cart-total').innerText = (subtotal + shipping) + " ج.م";
+        }
+
+        function changeQty(index, delta) {
+            cart[index].qty += delta;
+            if (cart[index].qty <= 0) {
+                cart.splice(index, 1);
+            }
+            updateCartUI();
+        }
+
+        function toggleCart() {
+            const modal = document.getElementById('cart-modal');
+            modal.classList.toggle('hidden');
+            updateCartUI();
+        }
+
+        function checkoutWhatsApp() {
+            if (cart.length === 0) return alert("السلة فارغة!");
+            let text = "🛒 طلب جديد من متجر Elgoharey Store:\n\n";
+            let subtotal = 0;
+            cart.forEach(item => {
+                text += `- ${item.name} (كود: ${item.code}) × ${item.qty} | السعر: ${item.price * item.qty} ج.م\n`;
+                subtotal += item.price * item.qty;
+            });
+            text += `\n📦 مصاريف الشحن الثابتة: 150 ج.م\n`;
+            text += `💰 الإجمالي الكلي: ${subtotal + 150} ج.م\n\nيرجى تأكيد الطلب.`;
+            window.open(`https://wa.me/201000000000?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        // إدارة لوحة التحكم (الدخول والحفظ)
+        function requestAdminAccess() {
+            document.getElementById('password-modal').classList.remove('hidden');
+        }
+        function togglePasswordModal() {
+            document.getElementById('password-modal').classList.add('hidden');
+        }
+        function verifyAdminPassword() {
+            const pass = document.getElementById('admin-pass-input').value;
+            if (pass === "1234") {
+                togglePasswordModal();
+                document.getElementById('view-store').classList.add('hidden');
+                document.getElementById('view-admin').classList.remove('hidden');
+                document.getElementById('btn-back-store').classList.remove('hidden');
+            } else {
+                alert("كلمة المرور غير صحيحة!");
+            }
+        }
+        function switchTab(tab) {
+            if (tab === 'store') {
+                document.getElementById('view-admin').classList.add('hidden');
+                document.getElementById('view-store').classList.remove('hidden');
+                document.getElementById('btn-back-store').classList.add('hidden');
+                renderStore();
+            }
+        }
+
+        function renderAdminList() {
+            const list = document.getElementById('admin-products-list');
+            list.innerHTML = '';
+            products.forEach(p => {
+                list.innerHTML += `
+                    <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs">
+                        <div class="flex items-center gap-2">
+                            <img src="${p.image}" class="w-10 h-10 object-cover rounded-lg">
+                            <div>
+                                <h4 class="font-bold text-gray-800">${p.name}</h4>
+                                <span class="text-gray-500">${p.code} | ${p.price} ج.م</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="editProduct(${p.id})" class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg font-bold">تعديل</button>
+                            <button onclick="deleteProduct(${p.id})" class="bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg font-bold">حذف</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('p-id').value;
+            const newProd = {
+                id: id ? Number(id) : Date.now(),
+                name: document.getElementById('p-name').value,
+                code: document.getElementById('p-code').value,
+                price: Number(document.getElementById('p-price').value),
+                category: document.getElementById('p-category').value,
+                image: document.getElementById('p-image-url').value
+            };
+
+            if (id) {
+                const index = products.findIndex(p => p.id === Number(id));
+                if (index !== -1) products[index] = newProd;
+            } else {
+                products.push(newProd);
+            }
+
+            alert("تم حفظ المنتج محلياً! تذكر تحديث محتوى ملف الـ Gist بالمنتجات الجديدة لكي يراها الجميع.");
+            resetForm();
+            renderAdminList();
+            renderStore();
+        }
+
+        function editProduct(id) {
+            const p = products.find(item => item.id === id);
+            if (!p) return;
+            document.getElementById('p-id').value = p.id;
+            document.getElementById('p-name').value = p.name;
+            document.getElementById('p-code').value = p.code;
+            document.getElementById('p-price').value = p.price;
+            document.getElementById('p-category').value = p.category;
+            document.getElementById('p-image-url').value = p.image;
+            document.getElementById('submit-btn').innerText = "تحديث المنتج ✏️";
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+        }
+
+        function deleteProduct(id) {
+            if (confirm("هل أنت متأكد من حذف هذا المنتج؟")) {
+                products = products.filter(p => p.id !== id);
+                renderAdminList();
+                renderStore();
+                alert("تم الحذف. تذكر تحديث ملف الـ Gist.");
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('product-form').reset();
+            document.getElementById('p-id').value = '';
+            document.getElementById('submit-btn').innerText = "حفظ وإضافة المنتج 🚀";
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+        }
+
+        // تشغيل الجلب عند التحميل
+        fetchProducts();
+        updateCartUI();
+    </script>
+</body>
+</html>
