@@ -97,9 +97,11 @@
                                 <option value="other">أخرى</option>
                             </select>
                         </div>
+                        <!-- حقل رابط صورة المنتج المضاف بوضوح -->
                         <div class="sm:col-span-2">
-                            <label class="block text-xs font-bold text-gray-700 mb-1">صورة المنتج (رابط مباشر للصورة)</label>
-                            <input type="text" id="p-image-url" required placeholder="مثال: https://i.imgur.com/xyz.jpg" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-600">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">رابط صورة المنتج (Image URL)</label>
+                            <input type="url" id="p-image-url" required placeholder="مثال: https://i.imgur.com/xyz.jpg" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-600">
+                            <p class="text-[10px] text-gray-400 mt-1">قم بنسخ رابط مباشر لصورة المنتج (مثل روابط Imgur أو صور منتجاتك).</p>
                         </div>
                         <div class="sm:col-span-2 pt-2 flex gap-2">
                             <button type="submit" id="submit-btn" class="flex-1 bg-[#0B2545] hover:bg-blue-900 text-white font-bold py-2.5 rounded-xl text-xs transition shadow">
@@ -180,7 +182,6 @@
         let cart = JSON.parse(localStorage.getItem('eg_cart')) || [];
         let currentCategory = 'all';
 
-        // جلب المنتجات عند فتح الصفحة
         async function fetchProducts() {
             try {
                 const response = await fetch(GIST_URL + '?t=' + new Date().getTime());
@@ -195,7 +196,6 @@
             }
         }
 
-        // عرض المتجر مع تطبيق الفلترة حسب القسم
         function renderStore() {
             const container = document.getElementById('products-container');
             container.innerHTML = '';
@@ -231,20 +231,15 @@
             });
         }
 
-        // تفعيل الأقسام وتغيير الألوان عند الضغط
         function filterCategory(cat, btnElement) {
             currentCategory = cat;
-            
-            // تحديث تصميم أزرار الأقسام
             document.querySelectorAll('.category-btn').forEach(btn => {
                 btn.className = "category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-blue-950/80 text-gray-300 hover:text-white shrink-0 transition border border-blue-900";
             });
             btnElement.className = "category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-600 text-white shrink-0 transition shadow-sm";
-
             renderStore();
         }
 
-        // سلة المشتريات
         function addToCart(id) {
             const product = products.find(p => p.id === id);
             if (!product) return;
@@ -328,7 +323,6 @@
             window.open(`https://wa.me/201000000000?text=${encodeURIComponent(text)}`, '_blank');
         }
 
-        // إدارة لوحة التحكم (الدخول والحفظ)
         function requestAdminAccess() {
             document.getElementById('password-modal').classList.remove('hidden');
         }
@@ -431,7 +425,6 @@
             document.getElementById('cancel-edit-btn').classList.add('hidden');
         }
 
-        // تشغيل الجلب عند التحميل
         fetchProducts();
         updateCartUI();
     </script>
