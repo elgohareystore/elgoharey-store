@@ -3,560 +3,1005 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elgoharey Store - المتجر الرقمي</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <title>متجر الجوهري | Elgoharey Store</title>
     <style>
-        body { font-family: 'Cairo', sans-serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        [x-cloak] { display: none !important; }
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-light: #64748b;
+            --border-color: #cbd5e1;
+            --sidebar-header: #f1f5f9;
+            --sidebar-footer: #f8fafc;
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body.dark-theme {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --header-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-light: #94a3b8;
+            --border-color: #334155;
+            --sidebar-header: #334155;
+            --sidebar-footer: #1e293b;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* التحكم في تنقل الصفحات */
+        .page-view {
+            display: none;
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        .page-view.active {
+            display: block;
+        }
+
+        /* الهيدر وشريط الملاحة */
+        header {
+            background-color: var(--header-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .search-bar {
+            display: flex;
+            flex: 0 1 400px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            outline: none;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .search-bar input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .theme-toggle-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 0.5rem 0.8rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle-btn:hover {
+            border-color: var(--primary-color);
+        }
+
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+        }
+
+        .cart-icon:hover {
+            border-color: var(--primary-color);
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            left: -8px;
+            background: var(--danger-color);
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 50%;
+        }
+
+        /* البانر الرئيسي */
+        .hero {
+            background: linear-gradient(135deg, #1e293b, var(--primary-color));
+            color: white;
+            text-align: center;
+            padding: 3rem 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .hero h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* شبكة المنتجات في الواجهة */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem 3rem 1rem;
+        }
+
+        .section-title {
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .product-image-container {
+            width: 100%;
+            height: 220px;
+            background-color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+        }
+
+        body.dark-theme .product-image-container {
+            background-color: #0f172a;
+        }
+
+        .product-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 0.25rem;
+        }
+
+        .product-info {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .btn-add {
+            margin-top: auto;
+            padding: 0.6rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-add:hover {
+            background: var(--primary-dark);
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+            font-size: 1.2rem;
+        }
+
+        /* زر الترس العائم */
+        .admin-floating-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 150;
+            transition: transform 0.2s ease, background-color 0.2s;
+        }
+
+        .admin-floating-btn:hover {
+            transform: rotate(45deg) scale(1.05);
+            background: var(--primary-dark);
+        }
+
+        /* -------------------------------------------------------------
+           تصميم صفحة لوحة التحكم المنفصلة (Dashboard View)
+        ------------------------------------------------------------- */
+        .admin-page-header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .admin-page-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .admin-header-btns {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-back-store {
+            padding: 0.6rem 1.2rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-logout {
+            padding: 0.6rem 1.2rem;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .admin-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .admin-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .admin-card h3 {
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .admin-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            padding: 0.6rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            outline: none;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .or-divider {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .btn-submit-form {
+            padding: 0.8rem;
+            background: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-cancel-edit {
+            padding: 0.6rem;
+            background: var(--text-light);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: none;
+        }
+
+        /* جدول لوحة التحكم */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: right;
+        }
+
+        .admin-table th, .admin-table td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .admin-table th {
+            background-color: var(--sidebar-header);
+            font-weight: bold;
+        }
+
+        .table-img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            background: #f1f5f9;
+            border-radius: 0.25rem;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-edit {
+            padding: 0.4rem 0.8rem;
+            background: var(--warning-color);
+            color: white;
+            border: none;
+            border-radius: 0.3rem;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .btn-delete {
+            padding: 0.4rem 0.8rem;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 0.3rem;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        /* اللوحة الجانبية للسلة */
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            z-index: 200;
+        }
+
+        .cart-overlay.active {
+            display: block;
+        }
+
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            left: -400px;
+            width: 380px;
+            max-width: 100%;
+            height: 100%;
+            background: var(--card-bg);
+            box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+            z-index: 201;
+            transition: left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-sidebar.active {
+            left: 0;
+        }
+
+        .cart-header {
+            padding: 1.5rem;
+            background: var(--sidebar-header);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .close-cart {
+            font-size: 1.5rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: var(--text-color);
+        }
+
+        .cart-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .cart-item-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-item-title {
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .cart-item-price {
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: var(--danger-color);
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .cart-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            background: var(--sidebar-footer);
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .btn-checkout {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-checkout:hover {
+            background: #059669;
+        }
+
+        .empty-msg {
+            text-align: center;
+            color: var(--text-light);
+            margin-top: 2rem;
+        }
+
+        footer {
+            background: #0f172a;
+            color: #94a3b8;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-gray-900 min-h-screen flex flex-col justify-between">
+<body>
 
-    <div>
-        <!-- رأس الصفحة -->
-        <header class="bg-gradient-to-r from-[#0B2545] via-[#13315C] to-[#0B2545] text-white sticky top-0 z-50 shadow-lg border-b border-blue-900/40">
-            <div class="w-full px-4 py-3 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-black text-lg shadow-inner">⚡</div>
-                    <div>
-                        <h1 class="text-sm font-black tracking-wider flex items-center gap-1">
-                            Elgoharey <span class="text-emerald-400 text-[10px] bg-emerald-950 px-2 py-0.5 rounded-full border border-emerald-500/30">Store</span>
-                        </h1>
-                        <p class="text-[9px] text-gray-300">مستلزمات الهواتف والتقنية الحديثة</p>
+    <!-- ==================== الصفحة الأولى: الواجهة الرئيسية للمتجر ==================== -->
+    <div id="storeView" class="page-view active">
+        <header>
+            <div class="navbar">
+                <div class="logo">Elgoharey Store</div>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="ابحث عن منتج بالاسم..." oninput="filterProducts()">
+                </div>
+                <div class="nav-actions">
+                    <button class="theme-toggle-btn" onclick="toggleTheme()">🌙</button>
+                    <div class="cart-icon" onclick="toggleCart()">
+                        🛒 السلة
+                        <span class="cart-count" id="cartCount">0</span>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="switchTab('store')" id="btn-back-store" class="hidden bg-blue-950/80 hover:bg-blue-900 text-gray-300 px-3 py-1.5 rounded-xl text-xs font-bold transition border border-blue-900">
-                        🛍️ العودة للمتجر
-                    </button>
-                    <button onclick="toggleCart()" class="relative bg-emerald-600 hover:bg-emerald-500 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-md">
-                        <span>🛒 السلة</span>
-                        <span id="cart-badge" class="bg-rose-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center hidden shadow-sm">0</span>
-                    </button>
-                </div>
-            </div>
-            <!-- شريط الأقسام -->
-            <div id="store-categories-bar" class="bg-[#081b33] px-3 py-2 border-t border-blue-900/30 flex gap-2 overflow-x-auto no-scrollbar justify-start md:justify-center">
-                <button onclick="filterCategory('all', this)" class="category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-600 text-white shrink-0 transition shadow-sm">الكل</button>
-                <button onclick="filterCategory('headset', this)" class="category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-blue-950/80 text-gray-300 hover:text-white shrink-0 transition border border-blue-900">سماعات</button>
-                <button onclick="filterCategory('charger', this)" class="category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-blue-950/80 text-gray-300 hover:text-white shrink-0 transition border border-blue-900">شواحن</button>
-                <button onclick="filterCategory('cable', this)" class="category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-blue-950/80 text-gray-300 hover:text-white shrink-0 transition border border-blue-900">كابلات</button>
-                <button onclick="filterCategory('other', this)" class="category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-blue-950/80 text-gray-300 hover:text-white shrink-0 transition border border-blue-900">أخرى</button>
             </div>
         </header>
 
-        <!-- المحتوى الرئيسي -->
-        <main class="p-3 md:p-6 pb-12 max-w-7xl mx-auto w-full">
-            <!-- قسم عرض المنتجات للزبائن -->
-            <div id="view-store" class="space-y-6">
-                <section class="w-full">
-                    <div class="relative rounded-3xl overflow-hidden shadow-xl border border-blue-900/30 bg-gradient-to-r from-[#0B2545] via-[#13315C] to-[#0B2545] p-6 text-white flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div class="z-10 text-center md:text-right space-y-2 max-w-lg">
-                            <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[11px] font-bold px-3 py-1 rounded-full inline-block shadow-inner">
-                                ⚡ شحن سريع لجميع محافظات مصر بمبلغ ثابت (150 ج.م)
-                            </span>
-                            <h2 class="text-xl sm:text-3xl font-black tracking-tight">
-                                Elgoharey <span class="text-emerald-400">Store</span>
-                            </h2>
-                            <p class="text-xs text-gray-300 leading-relaxed">
-                                تسوق أحدث إكسسوارات الهواتف، السماعات الأصلية، والشواحن الذكية بأفضل الأسعار.
-                            </p>
-                        </div>
-                    </div>
-                </section>
-                <div id="loading-indicator" class="text-center py-10 text-gray-400 text-xs font-bold">جاري تحميل المنتجات السحابية... ⌛</div>
-                <div id="products-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
-            </div>
+        <section class="hero">
+            <h1>أحدث المنتجات والتقنيات</h1>
+            <p>تسوق أفضل العروض اليومية بأسعار تنافسية</p>
+        </section>
 
-            <!-- لوحة التحكم للإدارة -->
-            <div id="view-admin" class="space-y-6 hidden max-w-4xl mx-auto">
-                <section class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 id="form-title" class="text-sm font-bold text-[#0B2545] flex items-center gap-2">
-                            <span>➕</span> إضافة منتج جديد
-                        </h2>
-                        <button onclick="openSettingsModal()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-lg font-bold transition">⚙️ إعدادات الربط السحابي</button>
-                    </div>
-                    <form id="product-form" onsubmit="handleFormSubmit(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <input type="hidden" id="p-id">
-                        <input type="hidden" id="p-image-url">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">اسم المنتج</label>
-                            <input type="text" id="p-name" required placeholder="مثال: سماعة بلوتوث إيربودز" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-600">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">كود المنتج (SKU)</label>
-                            <input type="text" id="p-code" required placeholder="مثال: ACC-201" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-600">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">السعر (ج.م)</label>
-                            <input type="number" id="p-price" required placeholder="مثال: 350" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-600">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">القسم</label>
-                            <select id="p-category" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-600">
-                                <option value="headset">سماعات</option>
-                                <option value="charger">شواحن</option>
-                                <option value="cable">كابلات</option>
-                                <option value="other">أخرى</option>
-                            </select>
-                        </div>
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-bold text-gray-700 mb-1">اختر صورة المنتج من الجهاز</label>
-                            <input type="file" id="p-image-file" accept="image/*" onchange="handleImageUpload(event)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none file:bg-[#0B2545] file:text-white file:border-0 file:rounded-lg file:px-3 file:py-1 file:text-xs file:font-bold file:ml-2 cursor-pointer">
-                            <div id="image-preview-container" class="mt-2 hidden">
-                                <span class="text-[10px] text-gray-500 block mb-1">معاينة الصورة:</span>
-                                <img id="image-preview" src="" class="w-16 h-16 object-cover rounded-xl border border-gray-200 shadow-sm">
-                            </div>
-                        </div>
-                        <div class="sm:col-span-2 pt-2 flex gap-2">
-                            <button type="submit" id="submit-btn" class="flex-1 bg-[#0B2545] hover:bg-blue-900 text-white font-bold py-2.5 rounded-xl text-xs transition shadow">
-                                حفظ ونشر المنتج للجميع 🚀
-                            </button>
-                            <button type="button" id="cancel-edit-btn" onclick="resetForm()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-4 py-2.5 rounded-xl text-xs transition">
-                                إلغاء
-                            </button>
-                        </div>
-                    </form>
-                </section>
-                <section class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200">
-                    <h2 class="text-sm font-bold text-[#0B2545] mb-4 flex items-center gap-2">
-                        <span>📦</span> قائمة المنتجات المسجلة
-                    </h2>
-                    <div id="admin-products-list" class="space-y-3"></div>
-                </section>
-            </div>
+        <main class="container">
+            <h2 class="section-title">المنتجات المتاحة</h2>
+            <div class="products-grid" id="productsGrid"></div>
         </main>
+
+        <button class="admin-floating-btn" onclick="accessAdminDashboard()" title="دخول لوحة التحكم">⚙️</button>
     </div>
 
-    <!-- تذييل الصفحة -->
-    <footer class="bg-[#0B2545] text-gray-400 py-4 px-4 text-center text-xs border-t border-blue-900/40 mt-10">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p class="font-bold text-gray-300">جميع الحقوق محفوظة لـ Elgoharey Store &copy; 2026</p>
-            <button onclick="requestAdminAccess()" title="إدارة المتجر" class="text-gray-500 hover:text-emerald-400 transition text-sm p-1">⚙️</button>
+    <!-- ==================== الصفحة الثانية: لوحة التحكم المنفصلة ==================== -->
+    <div id="adminView" class="page-view">
+        <div class="admin-page-header">
+            <div class="admin-page-title">⚙️ لوحة تحكم إدارة المتجر</div>
+            <div class="admin-header-btns">
+                <button class="btn-back-store" onclick="showStoreView()">🏪 العودة للمتجر</button>
+                <button class="btn-logout" onclick="adminLogout()">تسجيل الخروج</button>
+            </div>
         </div>
+
+        <div class="container">
+            <div class="admin-layout">
+                <!-- نموذج إضافة / تعديل منتج -->
+                <div class="admin-card">
+                    <h3 id="formCardTitle">➕ إضافة منتج جديد</h3>
+                    <form class="admin-form" id="productForm" onsubmit="handleFormSubmit(event)">
+                        <input type="hidden" id="editingProductId">
+                        <div class="form-group">
+                            <label for="prodName">اسم المنتج:</label>
+                            <input type="text" id="prodName" required placeholder="مثال: شاشة ذكية">
+                        </div>
+                        <div class="form-group">
+                            <label for="prodPrice">السعر (ج.م):</label>
+                            <input type="number" id="prodPrice" min="1" required placeholder="مثال: 500">
+                        </div>
+                        <div class="form-group">
+                            <label for="prodFile">رفع صورة من الجهاز:</label>
+                            <input type="file" id="prodFile" accept="image/*">
+                        </div>
+                        <div class="or-divider">أو</div>
+                        <div class="form-group">
+                            <label for="prodImage">رابط صورة خارجي:</label>
+                            <input type="url" id="prodImage" placeholder="https://via.placeholder.com/300x200">
+                        </div>
+                        <button type="submit" class="btn-submit-form" id="submitFormBtn">حفظ المنتج</button>
+                        <button type="button" class="btn-cancel-edit" id="cancelEditBtn" onclick="resetProductForm()">إلغاء التعديل</button>
+                    </form>
+                </div>
+
+                <!-- جدول عرض وتعديل وحذف المنتجات -->
+                <div class="admin-card">
+                    <h3>📦 قائمة المنتجات الحالية</h3>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>الصورة</th>
+                                    <th>الاسم</th>
+                                    <th>السعر</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminTableBody">
+                                <!-- يتم الملء بواسطة JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- اللوحة الجانبية للسلة والطبقة المظلمة -->
+    <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2>سلة التسوق</h2>
+            <button class="close-cart" onclick="toggleCart()">&times;</button>
+        </div>
+        <div class="cart-body" id="cartItems">
+            <p class="empty-msg">السلة فارغة حالياً</p>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>الإجمالي:</span>
+                <span id="cartTotal">0 ج.م</span>
+            </div>
+            <button class="btn-checkout" onclick="checkout()">إتمام الشراء</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Elgoharey Store. جميع الحقوق محفوظة.</p>
     </footer>
 
-    <!-- نافذة كلمة المرور للإدارة -->
-    <div id="password-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl space-y-4 border border-gray-100">
-            <div class="flex items-center justify-between">
-                <h3 class="font-bold text-xs text-[#0B2545]">تسجيل دخول لوحة التحكم 🔐</h3>
-                <button onclick="togglePasswordModal()" class="text-gray-400 hover:text-gray-700 font-bold">✕</button>
-            </div>
-            <div>
-                <label class="block text-[10px] font-bold text-gray-600 mb-1">كلمة المرور:</label>
-                <input type="password" id="admin-pass-input" placeholder="أدخل كلمة المرور" class="w-full bg-gray-50 border rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-600">
-                <p class="text-[9px] text-gray-400 mt-1">الافتراضية: 1234</p>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="verifyAdminPassword()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs transition shadow">دخول</button>
-                <button onclick="togglePasswordModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-3 py-2 rounded-xl text-xs transition">إلغاء</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- نافذة إعدادات الربط السحابي -->
-    <div id="settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-2xl p-5 shadow-2xl space-y-4 border border-gray-100">
-            <div class="flex items-center justify-between">
-                <h3 class="font-bold text-xs text-[#0B2545]">إعدادات التحديث التلقائي للجميع ⚙️</h3>
-                <button onclick="closeSettingsModal()" class="text-gray-400 hover:text-gray-700 font-bold">✕</button>
-            </div>
-            <p class="text-[11px] text-gray-500">أدخل بيانات ربط Gist لكي يتم تحديث المتجر للجميع فوراً:</p>
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">رابط ملف الـ Raw:</label>
-                    <input type="text" id="setting-raw-url" placeholder="https://gist.githubusercontent.com/..." class="w-full bg-gray-50 border rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-600">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">معرف Gist ID:</label>
-                    <input type="text" id="setting-gist-id" placeholder="معرف الملف" class="w-full bg-gray-50 border rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-600">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">رمز التوثيق (GitHub Token):</label>
-                    <input type="password" id="setting-github-token" placeholder="ghp_..." class="w-full bg-gray-50 border rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-600">
-                </div>
-            </div>
-            <div class="flex gap-2 pt-2">
-                <button onclick="saveSettings()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs transition shadow">حفظ</button>
-                <button onclick="closeSettingsModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-3 py-2 rounded-xl text-xs transition">إلغاء</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- نافذة السلة -->
-    <div id="cart-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex justify-end">
-        <div class="bg-white w-full max-w-md h-full flex flex-col p-4 shadow-2xl overflow-y-auto">
-            <div class="flex items-center justify-between pb-3 border-b border-gray-100">
-                <h3 class="font-bold text-sm text-[#0B2545]">🛒 سلة المشتريات</h3>
-                <button onclick="toggleCart()" class="text-gray-400 hover:text-gray-600 font-bold text-lg">✕</button>
-            </div>
-            <div id="cart-items-container" class="flex-1 py-4 space-y-3 overflow-y-auto"></div>
-            <div class="pt-3 border-t border-gray-100 space-y-3">
-                <div class="flex justify-between text-xs font-bold text-gray-600">
-                    <span>مصاريف الشحن (لكل المحافظات):</span>
-                    <span class="text-[#0B2545]">150 ج.م</span>
-                </div>
-                <div class="flex justify-between text-sm font-black text-[#0B2545]">
-                    <span>الإجمالي النهائي:</span>
-                    <span id="cart-total" class="text-emerald-600">0 ج.م</span>
-                </div>
-                <button onclick="checkoutWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2">
-                    <span>إرسال الطلب عبر واتساب</span>
-                    <span>💬</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        let GIST_URL = localStorage.getItem('eg_gist_url') || "";
-        let GIST_ID = localStorage.getItem('eg_gist_id') || "";
-        let GITHUB_TOKEN = localStorage.getItem('eg_github_token') || "";
+        const ADMIN_PASSWORD = "1234";
+        let isAdminLoggedIn = false;
 
-        let products = [];
-        let cart = JSON.parse(localStorage.getItem('eg_cart')) || [];
-        let currentCategory = 'all';
+        const initialProducts = [
+            { id: 1, name: 'سماعة لاسلكية احترافية', price: 150, image: 'https://via.placeholder.com/300x200' },
+            { id: 2, name: 'ساعة ذكية مقاومة للماء', price: 350, image: 'https://via.placeholder.com/300x200' },
+            { id: 3, name: 'شاحن سريع 65 واط', price: 90, image: 'https://via.placeholder.com/300x200' },
+            { id: 4, name: 'لوحة مفاتيح ميكانيكية', price: 280, image: 'https://via.placeholder.com/300x200' },
+            { id: 5, name: 'ماوس ألعاب لاسلكي', price: 120, image: 'https://via.placeholder.com/300x200' },
+            { id: 6, name: 'شاشة حاسوب 144 هرتز', price: 1250, image: 'https://via.placeholder.com/300x200' }
+        ];
 
-        async function fetchProducts() {
-            if (!GIST_URL) {
-                document.getElementById('loading-indicator').innerHTML = "⚠️ يرجى ضبط إعدادات الربط السحابي من لوحة التحكم (⚙️) لكي يتم جلب المنتجات.";
-                return;
-            }
-            try {
-                const response = await fetch(GIST_URL + '?t=' + new Date().getTime());
-                if (!response.ok) throw new Error("فشل الجلب");
-                products = await response.json();
-                document.getElementById('loading-indicator').style.display = 'none';
-                renderStore();
-                renderAdminList();
-            } catch (error) {
-                console.error(error);
-                document.getElementById('loading-indicator').innerHTML = "⚠️ تعذر جلب المنتجات. تأكد من صحة رابط الـ Raw الخاص بك.";
-            }
-        }
+        let products = JSON.parse(localStorage.getItem('elgoharey_products')) || initialProducts;
+        let cart = JSON.parse(localStorage.getItem('elgoharey_cart')) || [];
 
-        async function updateGistOnGitHub() {
-            if (!GIST_ID || !GITHUB_TOKEN) {
-                alert("تم الحفظ. لتحديث المنتجات للآخرين تلقائياً، أدخل بيانات Gist ID و Token في إعدادات الربط.");
-                return;
-            }
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            renderProducts(products);
+            updateCartUI();
+        });
 
-            const payload = {
-                files: {
-                    "products.json": {
-                        content: JSON.stringify(products, null, 2)
-                    }
+        /* --- إدارة التنقل بين المتجر ولوحة التحكم --- */
+        function accessAdminDashboard() {
+            if (!isAdminLoggedIn) {
+                const password = prompt('أدخل كلمة سر لوحة التحكم:');
+                if (password === ADMIN_PASSWORD) {
+                    isAdminLoggedIn = true;
+                    showAdminView();
+                } else if (password !== null) {
+                    alert('كلمة السر غير صحيحة!');
                 }
-            };
-
-            try {
-                const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (response.ok) {
-                    alert("🚀 تم تحديث ونشر المنتجات للجميع بنجاح!");
-                } else {
-                    alert("⚠️ خطأ في التحديث، تأكد من صحة التوكن.");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("⚠️ تعذر الاتصال بخادم GitHub.");
+            } else {
+                showAdminView();
             }
         }
 
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const base64String = e.target.result;
-                    document.getElementById('p-image-url').value = base64String;
-                    document.getElementById('image-preview').src = base64String;
-                    document.getElementById('image-preview-container').classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
+        function showAdminView() {
+            document.getElementById('storeView').classList.remove('active');
+            document.getElementById('adminView').classList.add('active');
+            renderAdminTable();
         }
 
-        function renderStore() {
-            const container = document.getElementById('products-container');
-            container.innerHTML = '';
+        function showStoreView() {
+            document.getElementById('adminView').classList.remove('active');
+            document.getElementById('storeView').classList.add('active');
+            renderProducts(products);
+        }
 
-            let filtered = products;
-            if (currentCategory !== 'all') {
-                filtered = products.filter(p => p.category === currentCategory);
-            }
+        function adminLogout() {
+            isAdminLoggedIn = false;
+            resetProductForm();
+            showStoreView();
+            alert('تم تسجيل الخروج من لوحة التحكم بنجاح.');
+        }
 
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400 text-xs font-bold">لا توجد منتجات متاحة حالياً.</div>`;
+        /* --- إدارة المنتجات (إضافة / تعديل / حذف) --- */
+        function saveProducts() {
+            localStorage.setItem('elgoharey_products', JSON.stringify(products));
+        }
+
+        function renderProducts(items) {
+            const grid = document.getElementById('productsGrid');
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="no-results">لا توجد منتجات تطابق بحثك.</div>';
                 return;
             }
 
-            filtered.forEach(p => {
-                container.innerHTML += `
-                    <div class="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm flex flex-col justify-between group hover:shadow-md transition">
-                        <div>
-                            <div class="w-full h-36 bg-gray-50 rounded-xl overflow-hidden mb-2 relative">
-                                <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                                <span class="absolute top-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[9px] font-bold px-2 py-0.5 rounded-md">${p.code}</span>
-                            </div>
-                            <h3 class="font-bold text-xs text-gray-800 line-clamp-1 mb-1">${p.name}</h3>
-                        </div>
-                        <div class="pt-2 border-t border-gray-50 flex items-center justify-between">
-                            <span class="font-black text-emerald-600 text-xs">${p.price} ج.م</span>
-                            <button onclick="addToCart(${p.id})" class="bg-[#0B2545] hover:bg-blue-900 text-white px-3 py-1.5 rounded-xl text-[10px] font-bold transition shadow-sm">
-                                أضف للسلة
-                            </button>
-                        </div>
+            grid.innerHTML = items.map(product => `
+                <div class="product-card">
+                    <div class="product-image-container">
+                        <img src="${product.image}" alt="${product.name}" class="product-image">
                     </div>
-                `;
-            });
-        }
-
-        function filterCategory(cat, btnElement) {
-            currentCategory = cat;
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.className = "category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-blue-950/80 text-gray-300 hover:text-white shrink-0 transition border border-blue-900";
-            });
-            btnElement.className = "category-btn px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-600 text-white shrink-0 transition shadow-sm";
-            renderStore();
-        }
-
-        function addToCart(id) {
-            const product = products.find(p => p.id === id);
-            if (!product) return;
-            const existing = cart.find(item => item.id === id);
-            if (existing) {
-                existing.qty += 1;
-            } else {
-                cart.push({ ...product, qty: 1 });
-            }
-            updateCartUI();
-        }
-
-        function updateCartUI() {
-            localStorage.setItem('eg_cart', JSON.stringify(cart));
-            const badge = document.getElementById('cart-badge');
-            const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-            
-            if (totalItems > 0) {
-                badge.innerText = totalItems;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
-
-            const container = document.getElementById('cart-items-container');
-            container.innerHTML = '';
-            let subtotal = 0;
-
-            if (cart.length === 0) {
-                container.innerHTML = `<p class="text-center text-gray-400 text-xs py-10">السلة فارغة حالياً</p>`;
-            } else {
-                cart.forEach((item, index) => {
-                    subtotal += item.price * item.qty;
-                    container.innerHTML += `
-                        <div class="flex items-center justify-between bg-gray-50 p-2.5 rounded-xl border border-gray-100 text-xs">
-                            <div class="flex items-center gap-2">
-                                <img src="${item.image}" class="w-10 h-10 object-cover rounded-lg">
-                                <div>
-                                    <h4 class="font-bold text-gray-800 line-clamp-1">${item.name}</h4>
-                                    <span class="text-emerald-600 font-bold">${item.price} ج.م</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button onclick="changeQty(${index}, 1)" class="w-6 h-6 bg-white border rounded-md font-bold shadow-xs">+</button>
-                                <span class="font-bold text-xs">${item.qty}</span>
-                                <button onclick="changeQty(${index}, -1)" class="w-6 h-6 bg-white border rounded-md font-bold shadow-xs">-</button>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-
-            const shipping = cart.length > 0 ? 150 : 0;
-            document.getElementById('cart-total').innerText = (subtotal + shipping) + " ج.م";
-        }
-
-        function changeQty(index, delta) {
-            cart[index].qty += delta;
-            if (cart[index].qty <= 0) {
-                cart.splice(index, 1);
-            }
-            updateCartUI();
-        }
-
-        function toggleCart() {
-            document.getElementById('cart-modal').classList.toggle('hidden');
-            updateCartUI();
-        }
-
-        function checkoutWhatsApp() {
-            if (cart.length === 0) return alert("السلة فارغة!");
-            let text = "🛒 طلب جديد من متجر Elgoharey Store:\n\n";
-            let subtotal = 0;
-            cart.forEach(item => {
-                text += `- ${item.name} (كود: ${item.code}) × ${item.qty} | السعر: ${item.price * item.qty} ج.م\n`;
-                subtotal += item.price * item.qty;
-            });
-            text += `\n📦 مصاريف الشحن الثابتة: 150 ج.م\n`;
-            text += `💰 الإجمالي الكلي: ${subtotal + 150} ج.م\n\nيرجى تأكيد الطلب.`;
-            window.open(`https://wa.me/201000000000?text=${encodeURIComponent(text)}`, '_blank');
-        }
-
-        function requestAdminAccess() {
-            document.getElementById('password-modal').classList.remove('hidden');
-        }
-        function togglePasswordModal() {
-            document.getElementById('password-modal').classList.add('hidden');
-        }
-        function verifyAdminPassword() {
-            const pass = document.getElementById('admin-pass-input').value;
-            if (pass === "1234") {
-                togglePasswordModal();
-                document.getElementById('view-store').classList.add('hidden');
-                document.getElementById('view-admin').classList.remove('hidden');
-                document.getElementById('btn-back-store').classList.remove('hidden');
-            } else {
-                alert("كلمة المرور غير صحيحة!");
-            }
-        }
-        function switchTab(tab) {
-            if (tab === 'store') {
-                document.getElementById('view-admin').classList.add('hidden');
-                document.getElementById('view-store').classList.remove('hidden');
-                document.getElementById('btn-back-store').classList.add('hidden');
-                fetchProducts();
-            }
-        }
-
-        function openSettingsModal() {
-            document.getElementById('setting-raw-url').value = GIST_URL;
-            document.getElementById('setting-gist-id').value = GIST_ID;
-            document.getElementById('setting-github-token').value = GITHUB_TOKEN;
-            document.getElementById('settings-modal').classList.remove('hidden');
-        }
-        function closeSettingsModal() {
-            document.getElementById('settings-modal').classList.add('hidden');
-        }
-        function saveSettings() {
-            GIST_URL = document.getElementById('setting-raw-url').value.trim();
-            GIST_ID = document.getElementById('setting-gist-id').value.trim();
-            GITHUB_TOKEN = document.getElementById('setting-github-token').value.trim();
-
-            localStorage.setItem('eg_gist_url', GIST_URL);
-            localStorage.setItem('eg_gist_id', GIST_ID);
-            localStorage.setItem('eg_github_token', GITHUB_TOKEN);
-
-            closeSettingsModal();
-            alert("تم حفظ إعدادات الربط بنجاح!");
-            fetchProducts();
-        }
-
-        function renderAdminList() {
-            const list = document.getElementById('admin-products-list');
-            list.innerHTML = '';
-            products.forEach(p => {
-                list.innerHTML += `
-                    <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-100 text-xs">
-                        <div class="flex items-center gap-2">
-                            <img src="${p.image}" class="w-10 h-10 object-cover rounded-lg">
-                            <div>
-                                <h4 class="font-bold text-gray-800">${p.name}</h4>
-                                <span class="text-gray-500">${p.code} | ${p.price} ج.م</span>
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="editProduct(${p.id})" class="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg font-bold">تعديل</button>
-                            <button onclick="deleteProduct(${p.id})" class="bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg font-bold">حذف</button>
-                        </div>
+                    <div class="product-info">
+                        <h3 class="product-title">${product.name}</h3>
+                        <div class="product-price">${product.price} ج.م</div>
+                        <button class="btn-add" onclick="addToCart('${product.name}', ${product.price})">إضافة للسلة</button>
                     </div>
-                `;
-            });
+                </div>
+            `).join('');
+        }
+
+        function renderAdminTable() {
+            const tbody = document.getElementById('adminTableBody');
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">لا توجد منتجات حالياً.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = products.map(product => `
+                <tr>
+                    <td><img src="${product.image}" class="table-img" alt="${product.name}"></td>
+                    <td>${product.name}</td>
+                    <td>${product.price} ج.م</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-edit" onclick="startEditProduct(${product.id})">تعديل</button>
+                            <button class="btn-delete" onclick="deleteProductFromAdmin(${product.id})">حذف</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
         }
 
         async function handleFormSubmit(e) {
             e.preventDefault();
-            const id = document.getElementById('p-id').value;
-            const imageUrl = document.getElementById('p-image-url').value;
 
-            if (!imageUrl && !id) {
-                alert("يرجى اختيار صورة للمنتج من الجهاز!");
+            const editingId = document.getElementById('editingProductId').value;
+            const nameInput = document.getElementById('prodName');
+            const priceInput = document.getElementById('prodPrice');
+            const fileInput = document.getElementById('prodFile');
+            const urlInput = document.getElementById('prodImage');
+
+            let imageUrl = '';
+
+            if (fileInput.files && fileInput.files[0]) {
+                imageUrl = await readFileAsDataURL(fileInput.files[0]);
+            } else if (urlInput.value.trim() !== '') {
+                imageUrl = urlInput.value.trim();
+            }
+
+            if (editingId) {
+                // الوضع: تعديل منتج قائم
+                const index = products.findIndex(p => p.id === Number(editingId));
+                if (index !== -1) {
+                    products[index].name = nameInput.value.trim();
+                    products[index].price = Number(priceInput.value);
+                    if (imageUrl) {
+                        products[index].image = imageUrl;
+                    }
+                    alert('تم تعديل المنتج بنجاح!');
+                }
+            } else {
+                // الوضع: إضافة منتج جديد
+                const newProduct = {
+                    id: Date.now(),
+                    name: nameInput.value.trim(),
+                    price: Number(priceInput.value),
+                    image: imageUrl || 'https://via.placeholder.com/300x200'
+                };
+                products.push(newProduct);
+                alert('تمت إضافة المنتج بنجاح!');
+            }
+
+            saveProducts();
+            renderAdminTable();
+            resetProductForm();
+        }
+
+        function startEditProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            document.getElementById('editingProductId').value = product.id;
+            document.getElementById('prodName').value = product.name;
+            document.getElementById('prodPrice').value = product.price;
+            document.getElementById('prodImage').value = product.image.startsWith('data:') ? '' : product.image;
+
+            document.getElementById('formCardTitle').innerText = '✏️ تعديل بيانات المنتج';
+            document.getElementById('submitFormBtn').innerText = 'تحديث البيانات';
+            document.getElementById('cancelEditBtn').style.display = 'block';
+        }
+
+        function resetProductForm() {
+            document.getElementById('productForm').reset();
+            document.getElementById('editingProductId').value = '';
+            document.getElementById('formCardTitle').innerText = '➕ إضافة منتج جديد';
+            document.getElementById('submitFormBtn').innerText = 'حفظ المنتج';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+        }
+
+        function deleteProductFromAdmin(productId) {
+            if (confirm('هل أنت تأكد من رغبتك في حذف هذا المنتج من المتجر؟')) {
+                products = products.filter(p => p.id !== productId);
+                saveProducts();
+                renderAdminTable();
+            }
+        }
+
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function filterProducts() {
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            const filtered = products.filter(product => 
+                product.name.toLowerCase().includes(searchTerm)
+            );
+            renderProducts(filtered);
+        }
+
+        /* --- إدارة الوضع الداكن --- */
+        function initTheme() {
+            const savedTheme = localStorage.getItem('elgoharey_theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            localStorage.setItem('elgoharey_theme', isDark ? 'dark' : 'light');
+        }
+
+        /* --- إدارة السلة --- */
+        function toggleCart() {
+            document.getElementById('cartSidebar').classList.toggle('active');
+            document.getElementById('cartOverlay').classList.toggle('active');
+        }
+
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            saveCart();
+            updateCartUI();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            saveCart();
+            updateCartUI();
+        }
+
+        function saveCart() {
+            localStorage.setItem('elgoharey_cart', JSON.stringify(cart));
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                alert('السلة فارغة!');
+                return;
+            }
+            alert('تم استلام طلبك بنجاح!');
+            cart = [];
+            saveCart();
+            updateCartUI();
+            toggleCart();
+        }
+
+        function updateCartUI() {
+            const cartItemsContainer = document.getElementById('cartItems');
+            const cartCount = document.getElementById('cartCount');
+            const cartTotal = document.getElementById('cartTotal');
+
+            cartCount.innerText = cart.length;
+
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<p class="empty-msg">السلة فارغة حالياً</p>';
+                cartTotal.innerText = '0 ج.م';
                 return;
             }
 
-            const existingProd = id ? products.find(p => p.id === Number(id)) : null;
+            let html = '';
+            let total = 0;
 
-            const newProd = {
-                id: id ? Number(id) : Date.now(),
-                name: document.getElementById('p-name').value,
-                code: document.getElementById('p-code').value,
-                price: Number(document.getElementById('p-price').value),
-                category: document.getElementById('p-category').value,
-                image: imageUrl || (existingProd ? existingProd.image : '')
-            };
+            cart.forEach((item, index) => {
+                total += item.price;
+                html += `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <span class="cart-item-title">${item.name}</span>
+                            <span class="cart-item-price">${item.price} ج.م</span>
+                        </div>
+                        <button class="remove-btn" onclick="removeFromCart(${index})">حذف</button>
+                    </div>
+                `;
+            });
 
-            if (id) {
-                const index = products.findIndex(p => p.id === Number(id));
-                if (index !== -1) products[index] = newProd;
-            } else {
-                products.push(newProd);
-            }
-
-            resetForm();
-            renderAdminList();
-            renderStore();
-            await updateGistOnGitHub();
+            cartItemsContainer.innerHTML = html;
+            cartTotal.innerText = total + ' ج.م';
         }
-
-        function editProduct(id) {
-            const p = products.find(item => item.id === id);
-            if (!p) return;
-            document.getElementById('p-id').value = p.id;
-            document.getElementById('p-name').value = p.name;
-            document.getElementById('p-code').value = p.code;
-            document.getElementById('p-price').value = p.price;
-            document.getElementById('p-category').value = p.category;
-            document.getElementById('p-image-url').value = p.image;
-            
-            document.getElementById('image-preview').src = p.image;
-            document.getElementById('image-preview-container').classList.remove('hidden');
-
-            document.getElementById('submit-btn').innerText = "تحديث النشر ✏️";
-            document.getElementById('cancel-edit-btn').classList.remove('hidden');
-        }
-
-        async function deleteProduct(id) {
-            if (confirm("هل أنت متأكد من حذف هذا المنتج؟")) {
-                products = products.filter(p => p.id !== id);
-                renderAdminList();
-                renderStore();
-                await updateGistOnGitHub();
-            }
-        }
-
-        function resetForm() {
-            document.getElementById('product-form').reset();
-            document.getElementById('p-id').value = '';
-            document.getElementById('p-image-url').value = '';
-            document.getElementById('image-preview-container').classList.add('hidden');
-            document.getElementById('submit-btn').innerText = "حفظ ونشر المنتج للجميع 🚀";
-            document.getElementById('cancel-edit-btn').classList.add('hidden');
-        }
-
-        fetchProducts();
-        updateCartUI();
     </script>
 </body>
 </html>
