@@ -15,10 +15,12 @@
         .form-group { margin-bottom: 1rem; }
         .form-group label { display: block; margin-bottom: 0.4rem; font-weight: bold; }
         .form-group input { width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; }
-        .btn { padding: 0.6rem 1.2rem; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; text-decoration: none; }
+        .btn { padding: 0.5rem 1rem; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; text-decoration: none; display: inline-block; margin: 2px; }
         .btn-primary { background: #2563eb; }
         .btn-success { background: #10b981; width: 100%; }
+        .btn-warning { background: #f59e0b; }
         .btn-danger { background: #ef4444; }
+        .btn-secondary { background: #64748b; width: 100%; margin-top: 5px; }
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
         th, td { padding: 0.8rem; border-bottom: 1px solid #e2e8f0; text-align: right; vertical-align: middle; }
         .img-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; }
@@ -29,21 +31,21 @@
 <body>
 
     <header>
-        <h2>⚙️ لوحة إدارة المنتجات (ربط تلقائي + رفع صور)</h2>
+        <h2>⚙️ لوحة إدارة المنتجات (إضافة، تعديل، حذف)</h2>
         <a href="index.html" class="btn btn-primary">🏪 العودة للمتجر</a>
     </header>
 
     <div class="container">
-        <!-- إعدادات GitHub و النموذج -->
+        <!-- إعدادات GitHub والنموذج -->
         <div class="card">
             <h3>🔑 بيانات الربط مع GitHub</h3>
             <div class="form-group" style="margin-top: 1rem;">
                 <label>اسم المستخدم في GitHub:</label>
-                <input type="text" id="ghUsername" placeholder="مثال: elgoharey">
+                <input type="text" id="ghUsername" placeholder="مثال: elgohareystore">
             </div>
             <div class="form-group">
                 <label>اسم المستودع (Repo):</label>
-                <input type="text" id="ghRepo" placeholder="مثال: store">
+                <input type="text" id="ghRepo" placeholder="مثال: elgoharey-store">
             </div>
             <div class="form-group">
                 <label>رمز الـ Token الشخصي:</label>
@@ -53,8 +55,10 @@
 
             <hr style="margin: 15px 0; border: 0; border-top: 1px solid #e2e8f0;">
 
-            <h3>➕ إضافة منتج جديد</h3>
-            <form id="addForm" onsubmit="addProduct(event)" style="margin-top: 1rem;">
+            <h3 id="formTitle">➕ إضافة منتج جديد</h3>
+            <form id="productForm" onsubmit="handleFormSubmit(event)" style="margin-top: 1rem;">
+                <input type="hidden" id="editIndex" value="-1">
+
                 <div class="form-group">
                     <label>اسم المنتج:</label>
                     <input type="text" id="prodName" required placeholder="مثال: شاحن سريع">
@@ -66,7 +70,7 @@
                 
                 <!-- رفع الصورة من الجهاز -->
                 <div class="form-group">
-                    <label>اختر صورة من جهازك:</label>
+                    <label>اختر صورة جديدة من جهازك:</label>
                     <div class="upload-box">
                         <input type="file" id="prodFile" accept="image/*" onchange="previewSelectedFile(event)">
                     </div>
@@ -78,16 +82,17 @@
                 </div>
 
                 <div id="imagePreviewContainer" style="display:none; text-align:center; margin-bottom: 1rem;">
-                    <label>معاينة الصورة المختارة:</label><br>
+                    <label>معاينة الصورة:</label><br>
                     <img id="imgPreview" class="img-preview" style="width: 80px; height: 80px; margin-top: 5px;" src="">
                 </div>
 
                 <button type="submit" class="btn btn-success" id="saveBtn">🚀 حفظ ونشر على GitHub</button>
+                <button type="button" class="btn btn-secondary" id="cancelBtn" style="display:none;" onclick="resetForm()">إلغاء التعديل</button>
             </form>
             <div id="statusMsg" class="status-msg"></div>
         </div>
 
-        <!-- جدول القائمة -->
+        <!-- جدول المنتجات -->
         <div class="card">
             <h3>📦 قائمة المنتجات الحالية</h3>
             <table>
@@ -96,7 +101,7 @@
                         <th>الصورة</th>
                         <th>الاسم</th>
                         <th>السعر</th>
-                        <th>إجراء</th>
+                        <th>الإجراءات</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -142,52 +147,88 @@
                     <td><img src="${p.image}" class="img-preview" alt="${p.name}"></td>
                     <td>${p.name}</td>
                     <td>${p.price} ج.م</td>
-                    <td><button class="btn btn-danger" onclick="deleteProduct(${index})">حذف ونشر</button></td>
+                    <td>
+                        <button class="btn btn-warning" onclick="editProduct(${index})">تعديل</button>
+                        <button class="btn btn-danger" onclick="deleteProduct(${index})">حذف</button>
+                    </td>
                 </tr>
             `).join('');
         }
 
-        // تحويل صورة الجهاز إلى Base64 ومعاينتها
+        // معاينة صورة الجهاز
         function previewSelectedFile(event) {
             const file = event.target.files[0];
             if (file) {
-                // تظبيط الحجم كي لا يتجاوز 1 ميجابايت لسرعة الأداء
                 if (file.size > 1024 * 1024) {
-                    alert('⚠️ يفضل اختيار صورة حجمها أقل من 1 ميجابايت لضمان سرعة التحميل.');
+                    alert('⚠️ يفضل اختيار صورة حجمها أقل من 1 ميجابايت لضمان السرعة.');
                 }
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     base64Image = e.target.result;
                     document.getElementById('imgPreview').src = base64Image;
                     document.getElementById('imagePreviewContainer').style.display = 'block';
-                    document.getElementById('prodImage').value = ''; // تفريغ الرابط عند اختيار ملف
+                    document.getElementById('prodImage').value = '';
                 };
                 reader.readAsDataURL(file);
             }
         }
 
-        // إضافة منتج جديد
-        async function addProduct(e) {
+        // تجهيز النموذج لتعديل منتج معين
+        function editProduct(index) {
+            const p = products[index];
+            document.getElementById('editIndex').value = index;
+            document.getElementById('prodName').value = p.name;
+            document.getElementById('prodPrice').value = p.price;
+            document.getElementById('prodImage').value = p.image.startsWith('data:') ? '' : p.image;
+            
+            base64Image = p.image.startsWith('data:') ? p.image : '';
+            document.getElementById('imgPreview').src = p.image;
+            document.getElementById('imagePreviewContainer').style.display = 'block';
+
+            document.getElementById('formTitle').innerText = '✏️ تعديل بيانات المنتج';
+            document.getElementById('saveBtn').innerText = '💾 حفظ التعديلات ونشرها';
+            document.getElementById('cancelBtn').style.display = 'block';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // إلغاء الوضع وإعادة النموذج للإضافة
+        function resetForm() {
+            document.getElementById('productForm').reset();
+            document.getElementById('editIndex').value = "-1";
+            document.getElementById('formTitle').innerText = '➕ إضافة منتج جديد';
+            document.getElementById('saveBtn').innerText = '🚀 حفظ ونشر على GitHub';
+            document.getElementById('cancelBtn').style.display = 'none';
+            document.getElementById('imagePreviewContainer').style.display = 'none';
+            base64Image = "";
+        }
+
+        // معالجة الإضافة أو التعديل
+        async function handleFormSubmit(e) {
             e.preventDefault();
+            const editIndex = parseInt(document.getElementById('editIndex').value);
             const name = document.getElementById('prodName').value;
             const price = Number(document.getElementById('prodPrice').value);
             const urlImage = document.getElementById('prodImage').value.trim();
             
-            // تحديد مصدر الصورة (الملف من الجهاز أو الرابط)
-            const finalImage = base64Image || urlImage;
+            const finalImage = base64Image || urlImage || (editIndex !== -1 ? products[editIndex].image : '');
 
             if (!finalImage) {
                 alert('يرجى اختيار صورة من الجهاز أو أدخل رابط صورة!');
                 return;
             }
 
-            products.push({ id: Date.now().toString(), name, price, image: finalImage });
+            if (editIndex === -1) {
+                // إضافة جديد
+                products.push({ id: Date.now().toString(), name, price, image: finalImage });
+            } else {
+                // تعديل المنتج الحالي
+                products[editIndex] = { ...products[editIndex], name, price, image: finalImage };
+            }
             
             const success = await syncWithGitHub();
             if (success) {
-                document.getElementById('addForm').reset();
-                document.getElementById('imagePreviewContainer').style.display = 'none';
-                base64Image = "";
+                resetForm();
                 renderTable();
             }
         }
@@ -212,7 +253,7 @@
             }
 
             status.style.color = "#2563eb";
-            status.innerText = "⏳ جاري رفع الصورة وتحديث GitHub...";
+            status.innerText = "⏳ جاري تحديث المنتجات على GitHub...";
 
             try {
                 const getUrl = `https://api.github.com/repos/${username}/${repo}/contents/data.json`;
@@ -236,7 +277,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        message: 'تحديث المنتجات والصور تلقائياً عبر لوحة التحكم',
+                        message: 'تحديث أو تعديل المنتجات عبر لوحة التحكم',
                         content: encodedContent,
                         sha: sha ? sha : undefined
                     })
@@ -244,7 +285,7 @@
 
                 if (putRes.ok) {
                     status.style.color = "#10b981";
-                    status.innerText = "✅ تم النشر وتحديث المنتجات والصور بنجاح!";
+                    status.innerText = "✅ تم تحديث ونشر البيانات بنجاح!";
                     return true;
                 } else {
                     const err = await putRes.json();
