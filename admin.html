@@ -14,7 +14,7 @@
         .card { background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .form-group { margin-bottom: 1rem; }
         .form-group label { display: block; margin-bottom: 0.4rem; font-weight: bold; }
-        .form-group input { width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; }
+        .form-group input, .form-group select { width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; }
         .btn { padding: 0.5rem 1rem; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; text-decoration: none; display: inline-block; margin: 2px; }
         .btn-primary { background: #2563eb; }
         .btn-success { background: #10b981; width: 100%; }
@@ -31,7 +31,7 @@
 <body>
 
     <header>
-        <h2>⚙️ لوحة إدارة المنتجات (إضافة، تعديل، حذف)</h2>
+        <h2>⚙️ لوحة إدارة المنتجات والأقسام</h2>
         <a href="index.html" class="btn btn-primary">🏪 العودة للمتجر</a>
     </header>
 
@@ -61,14 +61,22 @@
 
                 <div class="form-group">
                     <label>اسم المنتج:</label>
-                    <input type="text" id="prodName" required placeholder="مثال: شاحن سريع">
+                    <input type="text" id="prodName" required placeholder="مثال: شاحن سريع 33 واط">
+                </div>
+                <div class="form-group">
+                    <label>قسم المنتج:</label>
+                    <select id="prodCategory">
+                        <option value="شاحن">شواحن 🔌</option>
+                        <option value="كابل">كابلات ⚡</option>
+                        <option value="سماعة">سماعات 🎧</option>
+                        <option value="أخرى">أخرى 📦</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>السعر (ج.م):</label>
                     <input type="number" id="prodPrice" required placeholder="مثال: 250">
                 </div>
                 
-                <!-- رفع الصورة من الجهاز -->
                 <div class="form-group">
                     <label>اختر صورة جديدة من جهازك:</label>
                     <div class="upload-box">
@@ -100,12 +108,13 @@
                     <tr>
                         <th>الصورة</th>
                         <th>الاسم</th>
+                        <th>القسم</th>
                         <th>السعر</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <tr><td colspan="4">جاري جلب المنتجات...</td></tr>
+                    <tr><td colspan="5">جاري جلب المنتجات...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -139,13 +148,14 @@
         function renderTable() {
             const tbody = document.getElementById('tableBody');
             if (products.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4">لا توجد منتجات.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5">لا توجد منتجات.</td></tr>';
                 return;
             }
             tbody.innerHTML = products.map((p, index) => `
                 <tr>
                     <td><img src="${p.image}" class="img-preview" alt="${p.name}"></td>
                     <td>${p.name}</td>
+                    <td><strong>${p.category || 'أخرى'}</strong></td>
                     <td>${p.price} ج.م</td>
                     <td>
                         <button class="btn btn-warning" onclick="editProduct(${index})">تعديل</button>
@@ -155,13 +165,9 @@
             `).join('');
         }
 
-        // معاينة صورة الجهاز
         function previewSelectedFile(event) {
             const file = event.target.files[0];
             if (file) {
-                if (file.size > 1024 * 1024) {
-                    alert('⚠️ يفضل اختيار صورة حجمها أقل من 1 ميجابايت لضمان السرعة.');
-                }
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     base64Image = e.target.result;
@@ -173,11 +179,11 @@
             }
         }
 
-        // تجهيز النموذج لتعديل منتج معين
         function editProduct(index) {
             const p = products[index];
             document.getElementById('editIndex').value = index;
             document.getElementById('prodName').value = p.name;
+            document.getElementById('prodCategory').value = p.category || 'أخرى';
             document.getElementById('prodPrice').value = p.price;
             document.getElementById('prodImage').value = p.image.startsWith('data:') ? '' : p.image;
             
@@ -192,7 +198,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // إلغاء الوضع وإعادة النموذج للإضافة
         function resetForm() {
             document.getElementById('productForm').reset();
             document.getElementById('editIndex').value = "-1";
@@ -203,11 +208,11 @@
             base64Image = "";
         }
 
-        // معالجة الإضافة أو التعديل
         async function handleFormSubmit(e) {
             e.preventDefault();
             const editIndex = parseInt(document.getElementById('editIndex').value);
             const name = document.getElementById('prodName').value;
+            const category = document.getElementById('prodCategory').value;
             const price = Number(document.getElementById('prodPrice').value);
             const urlImage = document.getElementById('prodImage').value.trim();
             
@@ -219,11 +224,9 @@
             }
 
             if (editIndex === -1) {
-                // إضافة جديد
-                products.push({ id: Date.now().toString(), name, price, image: finalImage });
+                products.push({ id: Date.now().toString(), name, category, price, image: finalImage });
             } else {
-                // تعديل المنتج الحالي
-                products[editIndex] = { ...products[editIndex], name, price, image: finalImage };
+                products[editIndex] = { ...products[editIndex], name, category, price, image: finalImage };
             }
             
             const success = await syncWithGitHub();
@@ -277,7 +280,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        message: 'تحديث أو تعديل المنتجات عبر لوحة التحكم',
+                        message: 'تحديث المنتجات والأقسام عبر لوحة التحكم',
                         content: encodedContent,
                         sha: sha ? sha : undefined
                     })
