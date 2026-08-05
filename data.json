@@ -1,10 +1,20 @@
-[
+{
+  "store_info": {
+    "name": "Elgoharey Store",
+    "version": "1.0"
+  },
+  "products": [
     {
-        "id": 1,
-        "code": "JBL-01",
-        "name": "سماعة JBL Tune wireless",
-        "price": 450,
-        "category": "headset",
-        "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80"
+      "id": "1",
+      "name": "سماعة لاسلكية",
+      "price": 450,
+      "image": "https://via.placeholder.com/300x200"
+    },
+    {
+      "id": "2",
+      "name": "ساعة ذكية",
+      "price": 850,
+      "image": "https://via.placeholder.com/300x200"
     }
-]
+  ]
+}
